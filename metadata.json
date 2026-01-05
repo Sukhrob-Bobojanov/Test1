@@ -1,0 +1,5 @@
+{
+  "name": "AceTest - AI Test Generator",
+  "description": "Upload a .docx file and instantly generate a comprehensive AI-powered test for your students. Features interactive test-taking, real-time grading, and detailed explanations.",
+  "requestFramePermissions": []
+}
