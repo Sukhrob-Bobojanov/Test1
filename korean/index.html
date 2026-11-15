@@ -1,0 +1,1518 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>TOPIK Yo'li</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;700;900&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: one phone-width column; lessons are stations on Seoul-metro lines, each stage wears its real line colour. */
+:root{
+  --bg:#EDF0F3; --surface:#FFFFFF; --surface2:#E2E7EC; --ink:#11161C; --muted:#586472; --line:#D3DAE1;
+  --accent:#00843D; --accent-ink:#FFFFFF; --good:#0A8A48; --good-bg:#DDF3E6; --bad:#C92F28; --bad-bg:#FBE3E1; --warn:#B56A00;
+  --ui:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --ko:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --num:"Space Grotesk","Inter",system-ui,sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0C0F13; --surface:#161B22; --surface2:#222A34; --ink:#EDF1F5; --muted:#93A0AE; --line:#2B3440;
+  --accent:#22C06C; --accent-ink:#04140B; --good:#35CC7E; --good-bg:#12311F; --bad:#FF6E64; --bad-bg:#3A1917; --warn:#F0A63A; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0C0F13; --surface:#161B22; --surface2:#222A34; --ink:#EDF1F5; --muted:#93A0AE; --line:#2B3440;
+  --accent:#22C06C; --accent-ink:#04140B; --good:#35CC7E; --good-bg:#12311F; --bad:#FF6E64; --bad-bg:#3A1917; --warn:#F0A63A; color-scheme:dark }
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--ui);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;padding:0;text-align:inherit}
+button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+button:disabled{cursor:not-allowed}
+.ko{font-family:var(--ko);word-break:keep-all}
+.wrap{max-width:680px;margin:0 auto;padding-block:16px 96px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:20px}
+h1,h2,h3,p{margin:0} h1,h2,h3{text-wrap:balance;line-height:1.2}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)} .small{font-size:13.5px}
+
+/* header */
+.top{display:flex;align-items:center;gap:12px;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand .sign{font-family:var(--ko);font-weight:900;font-size:20px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);flex:none}
+.brand b{font-family:var(--num);font-size:19px;letter-spacing:-.01em}
+.sync{font-size:12px;color:var(--muted);text-align:right}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--surface);border-radius:var(--r);padding:12px 14px;min-width:0}
+.stat b{display:block;font:700 26px/1.1 var(--num);font-variant-numeric:tabular-nums}
+.stat span{font-size:12.5px;color:var(--muted)}
+
+/* today plan */
+.plan{background:var(--surface);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
+.plan h2{font:700 20px/1.2 var(--num)}
+.steps{display:flex;flex-direction:column;gap:8px}
+.step{display:flex;align-items:center;gap:12px;width:100%;padding:12px;border-radius:12px;background:var(--bg);min-width:0}
+.step:disabled{opacity:.5}
+.step .n{font:700 14px var(--num);width:28px;height:28px;border-radius:50%;border:2px solid var(--muted);display:grid;place-items:center;flex:none}
+.step.done .n{background:var(--good);border-color:var(--good);color:var(--surface)}
+.step .tx{flex:1;min-width:0} .step .tx b{display:block} .step .tx span{font-size:13.5px;color:var(--muted)}
+.step .go{font-size:13px;font-weight:600;color:var(--accent);flex:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:12px 20px;border-radius:12px;font-weight:600;text-align:center}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:var(--surface2)}
+.btn.danger{background:var(--bad-bg);color:var(--bad)}
+.btn:disabled{opacity:.45}
+.btn.block{width:100%}
+
+/* metro map */
+.stage{display:flex;flex-direction:column;gap:4px}
+.stage-h{display:flex;align-items:center;gap:12px;padding:4px 0 10px}
+.badge{--c:var(--accent);width:36px;height:36px;border-radius:50%;background:var(--c);color:#fff;font:700 18px var(--num);display:grid;place-items:center;flex:none}
+.stage-h h3{font:700 18px/1.2 var(--num)} .stage-h .cnt{margin-left:auto;font:500 13px var(--num);color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
+.stations{list-style:none;margin:0;padding:0;position:relative}
+.stations::before{content:"";position:absolute;left:15px;top:22px;bottom:22px;width:6px;border-radius:3px;background:var(--c)}
+.st{position:relative;display:flex;align-items:center;gap:14px;width:100%;padding:9px 8px 9px 0;border-radius:12px;min-width:0}
+.st .dot{position:relative;z-index:1;width:36px;height:36px;display:grid;place-items:center;flex:none}
+.st .dot i{display:block;width:20px;height:20px;border-radius:50%;background:var(--surface);border:4px solid var(--c)}
+.st.done .dot i{background:var(--c)}
+.st.now .dot i{width:28px;height:28px;box-shadow:0 0 0 4px var(--bg),0 0 0 6px var(--c)}
+.st.xfer .dot i{border-radius:8px;width:24px;height:24px;border-color:var(--ink)}
+.st.xfer.done .dot i{background:var(--ink)}
+.st.locked{opacity:.5}
+.st .code{font:500 12px var(--num);color:var(--muted);font-variant-numeric:tabular-nums}
+.st .nm{flex:1;min-width:0} .st .nm b{display:block;font-weight:600} .st .nm .k{font-family:var(--ko);font-size:13.5px;color:var(--muted)}
+.st .tag{font-size:12px;font-weight:600;padding:3px 8px;border-radius:99px;background:var(--surface2);flex:none;font-variant-numeric:tabular-nums}
+.st.done .tag{background:var(--good-bg);color:var(--good)}
+.st.now{background:var(--surface)}
+
+/* bottom nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px))}
+.nav div{max-width:680px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.nav button{padding:10px 4px 9px;text-align:center;font-size:12.5px;font-weight:600;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px}
+.nav button .g{font:700 18px/1.2 var(--ko)}
+.nav button[aria-current="page"]{color:var(--accent)}
+.nav .pip{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:var(--bad);color:#fff;font:600 11px/18px var(--num);margin-left:4px;vertical-align:top}
+
+/* player */
+.player{max-width:680px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.pbar{display:flex;align-items:center;gap:12px;padding-block:14px}
+.pbar .x{width:40px;height:40px;border-radius:50%;background:var(--surface2);display:grid;place-items:center;font-size:18px;flex:none}
+.track{flex:1;height:10px;border-radius:5px;background:var(--surface2);overflow:hidden}
+.track i{display:block;height:100%;background:var(--c,var(--accent));border-radius:5px;transition:width .25s}
+.pbar .ct{font:500 13px var(--num);color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
+.pbody{flex:1;display:flex;flex-direction:column;gap:16px;padding-block:8px 20px}
+.pfoot{position:sticky;bottom:0;background:var(--bg);padding-block:12px calc(12px + env(safe-area-inset-bottom,0px));display:flex;gap:10px}
+.pfoot .btn{flex:1}
+.pfoot .btn.ghost{flex:0 0 auto}
+.slide-h{font:700 26px/1.15 var(--num)}
+.slide-k{font:700 34px/1.2 var(--ko)}
+.tip{background:var(--surface);border-radius:var(--r);padding:14px 16px}
+.tip b{display:block;margin-bottom:2px}
+.words{display:grid;gap:10px}
+.word{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 12px;width:100%;background:var(--surface);border-radius:var(--r);padding:14px 16px;min-width:0}
+.word .ko{font-weight:700;font-size:30px;line-height:1.25}
+.word .tr{font:500 14px var(--num);color:var(--accent)}
+.word .uz{font-size:17px;font-weight:500}
+.word .note{font-size:13.5px;color:var(--muted)}
+.word .l{min-width:0;display:flex;flex-direction:column;gap:1px}
+.spk{width:42px;height:42px;border-radius:50%;background:var(--surface2);display:grid;place-items:center;flex:none}
+.spk svg{width:20px;height:20px;fill:currentColor}
+.letters{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.letter{background:var(--surface);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:2px;align-items:flex-start;width:100%;min-width:0}
+.letter .ko{font-weight:900;font-size:54px;line-height:1.1}
+.letter .snd{font:700 18px var(--num);color:var(--accent)}
+.letter .note{font-size:13.5px;color:var(--muted)}
+.pat{font:700 28px/1.25 var(--ko)}
+.eq{display:inline-block;align-self:flex-start;background:var(--good-bg);color:var(--good);font-weight:600;padding:5px 12px;border-radius:99px}
+.ex{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.ex button{display:grid;grid-template-columns:1fr auto;gap:0 12px;align-items:center;width:100%;background:var(--surface);border-radius:12px;padding:12px 14px;min-width:0}
+.ex .ko{font-size:20px;font-weight:700} .ex .tr{font:500 13px var(--num);color:var(--accent)} .ex .uz{color:var(--muted)}
+.prose{display:flex;flex-direction:column;gap:10px;max-width:62ch}
+.prose ul{margin:0;padding-left:20px;display:grid;gap:4px}
+.blocks{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.blk{font:900 44px/1 var(--ko);background:var(--surface);border-radius:12px;padding:14px 16px}
+.blk small{display:block;font:500 12px var(--num);color:var(--muted);margin-top:6px}
+
+/* quiz */
+.qlabel{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.qbig{font-weight:900;font-size:clamp(40px,13vw,64px);line-height:1.2;text-align:center;padding:14px 0}
+.qprompt{font-size:22px;font-weight:600;line-height:1.35}
+.qprompt.ko{font-size:24px}
+.qsub{color:var(--muted)}
+.passage{background:var(--surface);border-radius:var(--r);padding:14px 16px;font-size:19px;line-height:1.7;white-space:pre-line}
+.blank{display:inline-block;min-width:54px;border-bottom:3px solid var(--accent);text-align:center;color:var(--accent);font-weight:700}
+.listen{align-self:center;width:96px;height:96px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
+.listen svg{width:40px;height:40px;fill:currentColor}
+.opts{display:grid;gap:10px}
+.opts.two{grid-template-columns:1fr 1fr}
+.opt{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;background:var(--surface);border:2px solid var(--line);border-radius:var(--r);padding:10px 14px;font-size:17px;font-weight:500;min-width:0;overflow-wrap:anywhere}
+.opt kbd{font:500 12px var(--num);color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:1px 6px;flex:none}
+.opts.kopts .opt{font-family:var(--ko);font-size:22px;font-weight:700}
+.opt.ok{border-color:var(--good);background:var(--good-bg)}
+.opt.no{border-color:var(--bad);background:var(--bad-bg)}
+.fb{border-radius:var(--r);padding:12px 16px;font-weight:600}
+.fb.ok{background:var(--good-bg);color:var(--good)} .fb.no{background:var(--bad-bg);color:var(--bad)}
+.fb span{display:block;font-weight:400;color:var(--ink);margin-top:2px}
+.line-a{min-height:64px;border-bottom:2px solid var(--line);display:flex;flex-wrap:wrap;gap:8px;padding:8px 0;align-content:flex-start}
+.tiles{display:flex;flex-wrap:wrap;gap:8px}
+.tile{font:700 20px var(--ko);background:var(--surface);border:2px solid var(--line);border-radius:10px;padding:8px 12px}
+.tile.used{visibility:hidden}
+
+/* result */
+.res{text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center;padding-top:24px}
+.ring{font:700 56px/1 var(--num);font-variant-numeric:tabular-nums}
+.ring.pass{color:var(--good)} .ring.fail{color:var(--bad)}
+.miss{list-style:none;padding:0;margin:0;display:grid;gap:8px;text-align:left;width:100%}
+.miss li{background:var(--surface);border-radius:12px;padding:12px 14px}
+
+/* flashcard + boost */
+.card{background:var(--surface);border-radius:20px;padding:28px 18px;text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center;min-height:240px;justify-content:center}
+.card .ko{font-weight:900;font-size:clamp(36px,12vw,56px);line-height:1.2}
+.card .uz{font-size:22px;font-weight:600}
+.hud{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.hud div{background:var(--surface);border-radius:12px;padding:8px}
+.hud b{display:block;font:700 24px var(--num);font-variant-numeric:tabular-nums}
+.hud span{font-size:12px;color:var(--muted)}
+.hero-k{font:900 44px/1.1 var(--ko)}
+
+/* topik page */
+.panel{background:var(--surface);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:10px}
+.panel h2{font:700 19px/1.2 var(--num)}
+.tblwrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14.5px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.road{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.road li{display:flex;gap:12px;align-items:flex-start}
+.road .badge{width:30px;height:30px;font-size:15px}
+.road b{display:block}
+.chip{display:inline-block;font-size:12px;font-weight:600;border-radius:99px;padding:2px 9px;background:var(--surface2);margin-left:6px;vertical-align:middle}
+.chip.on{background:var(--good-bg);color:var(--good)}
+.meter{height:12px;border-radius:6px;background:var(--surface2);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--accent)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.switch{width:52px;height:30px;border-radius:15px;background:var(--surface2);position:relative;flex:none}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--surface);box-shadow:0 0 0 1px var(--line);transition:transform .15s}
+.switch[aria-checked="true"]{background:var(--accent)}
+.switch[aria-checked="true"]::after{transform:translateX(22px)}
+@media (max-width:420px){.opts.two{grid-template-columns:1fr}.stat b{font-size:22px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+</style>
+<div id="main" class="wrap"></div>
+<div id="player" class="player" hidden></div>
+<nav class="nav" id="nav" aria-label="Bo'limlar"><div>
+  <button data-act="tab" data-tab="home"><span class="g">길</span>Yo'l</button>
+  <button data-act="tab" data-tab="review"><span class="g">복습</span><span>Takrorlash<span class="pip" id="pip" hidden></span></span></button>
+  <button data-act="tab" data-tab="boost"><span class="g">빨리</span>Boost</button>
+  <button data-act="tab" data-tab="topik"><span class="g">시험</span>TOPIK</button>
+</div></nav>
+<script>
+(() => {
+// Kurs ma'lumotlari. Har bir bosqich — Seul metrosining bitta liniyasi.
+// lesson: v=[koreyscha, o'zbekcha, izoh?]  g=[{p,uz,d,ex}]  c=[gap, javob, [chalg'ituvchilar], tarjima]
+// test:   qs=[{q, text?, audio?, opts, a, exp}]
+const STAGES = [];
+
+STAGES.push({
+  id: "h", line: 5, color: "#996CAC", name: "Hangul — alifbo", ko: "한글",
+  lessons: [
+    {
+      id: "h1", type: "hangul", t: "Asosiy unlilar", k: "모음 1",
+      goal: "6 ta asosiy unlini o'qish va bo'g'in qanday tuzilishini tushunish.",
+      tip: "Koreyada har kuni ko'rgan belgilaringiz endi tovushga aylanadi. Hangul — 24 ta harf, bir haftada o'rganiladi.",
+      intro: "<p>Har bir koreyscha bo'g'in bitta <b>katak</b> ichiga yoziladi: <b>undosh + unli</b> (ba'zan ostida yana bir undosh).</p><p>Unli yolg'iz o'qilsa, oldiga tovushsiz <b class='ko'>ㅇ</b> qo'yiladi: <b class='ko'>ㅏ</b> → <b class='ko'>아</b>.</p><p>Tik unlilar (ㅏ ㅓ ㅣ) undoshning <b>o'ng</b> tomoniga, yotiq unlilar (ㅗ ㅜ ㅡ) <b>ostiga</b> yoziladi.</p>",
+      letters: [
+        ["아", "a", "Chiziqcha o'ngga qaragan"],
+        ["어", "o", "«ota»dagi ochiq o. Chiziqcha chapga"],
+        ["오", "o'", "«o'n»dagi o'. Chiziqcha tepaga"],
+        ["우", "u", "Chiziqcha pastga"],
+        ["으", "ɨ", "Ruscha «ы» kabi, lab cho'zilmaydi"],
+        ["이", "i", "Tik chiziq"]
+      ],
+      words: [["아이", "bola"], ["오이", "bodring"], ["이", "ikki (2)"], ["오", "besh (5)"]]
+    },
+    {
+      id: "h2", type: "hangul", t: "Asosiy undoshlar", k: "자음 1",
+      goal: "9 ta asosiy undoshni o'qish va birinchi haqiqiy so'zlarni o'qish.",
+      tip: "ㄱ ㄷ ㅂ ㅈ so'z boshida k, t, p, ch ga yaqinroq, so'z o'rtasida g, d, b, j bo'lib eshitiladi. Shuning uchun 부산 ham «Busan», ham «Pusan» deb yoziladi.",
+      letters: [
+        ["가", "ga", "ㄱ — g/k. Burchak, «g»"],
+        ["나", "na", "ㄴ — n. Lotincha L ga o'xshaydi, lekin «n»"],
+        ["다", "da", "ㄷ — d/t. Ochiq eshik — «d»"],
+        ["라", "ra", "ㄹ — r/l. Ilon izi"],
+        ["마", "ma", "ㅁ — m. Kvadrat — yopiq og'iz"],
+        ["바", "ba", "ㅂ — b/p. Chelak"],
+        ["사", "sa", "ㅅ — s. Ikki oyoq"],
+        ["자", "ja", "ㅈ — j. ㅅ ustida tom"],
+        ["하", "ha", "ㅎ — h. Shlyapali odam"]
+      ],
+      words: [["나", "men"], ["나라", "davlat"], ["어머니", "ona"], ["아버지", "ota"], ["바나나", "banan"], ["버스", "avtobus"], ["가수", "xonanda"], ["모자", "shlyapa"], ["다리", "oyoq; ko'prik"], ["하나", "bitta"], ["누나", "opa (o'g'il bola uchun)"], ["지하", "yer osti"]]
+    },
+    {
+      id: "h3", type: "hangul", t: "Y-unlilar va E", k: "모음 2",
+      goal: "ㅑ ㅕ ㅛ ㅠ va ㅐ ㅔ unlilarini o'qish.",
+      tip: "Qoida oddiy: unliga ikkinchi chiziqcha qo'shilsa, oldiga «y» tovushi qo'shiladi: ㅏ a → ㅑ ya.",
+      letters: [
+        ["야", "ya", "ㅏ + chiziqcha"],
+        ["여", "yo", "ㅓ + chiziqcha. «yosh»dagi yo"],
+        ["요", "yo'", "ㅗ + chiziqcha. «yo'l»dagi yo'"],
+        ["유", "yu", "ㅜ + chiziqcha"],
+        ["애", "e", "ㅏ + ㅣ. Hozir ㅔ bilan bir xil o'qiladi"],
+        ["에", "e", "ㅓ + ㅣ. «-ga / -da» qo'shimchasi ham shu"]
+      ],
+      words: [["우유", "sut"], ["여자", "ayol"], ["요리", "taom, pazandalik"], ["야구", "beysbol"], ["노래", "qo'shiq"], ["가게", "do'kon"], ["메뉴", "menyu"], ["뉴스", "yangiliklar"], ["여기", "bu yer"], ["개", "it"], ["네", "ha"], ["배", "qorin; nok; kema"]]
+    },
+    {
+      id: "h4", type: "hangul", t: "Nafasli va qattiq undoshlar", k: "자음 2",
+      goal: "ㅋ ㅌ ㅍ ㅊ (nafasli) va ㄲ ㄸ ㅃ ㅆ ㅉ (qattiq) undoshlarini farqlash.",
+      tip: "Bitta qo'shimcha chiziq = kuchli nafas (ㄱ → ㅋ). Ikkilangan harf = qattiq, nafassiz tovush (ㄱ → ㄲ). 커피, 카드, 아파트 — bularni Koreyada ko'p ko'rgansiz.",
+      letters: [
+        ["카", "kha", "ㅋ — nafasli k"],
+        ["타", "tha", "ㅌ — nafasli t"],
+        ["파", "pha", "ㅍ — nafasli p"],
+        ["차", "cha", "ㅊ — ch"],
+        ["까", "kka", "ㄲ — qattiq k"],
+        ["따", "tta", "ㄸ — qattiq t"],
+        ["빠", "ppa", "ㅃ — qattiq p"],
+        ["싸", "ssa", "ㅆ — qattiq s"],
+        ["짜", "jja", "ㅉ — qattiq j"]
+      ],
+      words: [["커피", "qahva"], ["카드", "karta"], ["토마토", "pomidor"], ["파티", "ziyofat"], ["치마", "yubka"], ["코", "burun"], ["아빠", "dada"], ["오빠", "aka (qiz uchun)"], ["비싸요", "qimmat"], ["고추", "qalampir"], ["기차", "poyezd"], ["포도", "uzum"], ["아파트", "ko'p qavatli uy"], ["스키", "chang'i"]]
+    },
+    {
+      id: "h5", type: "hangul", t: "Qo'shma unlilar", k: "모음 3",
+      goal: "ㅘ ㅝ ㅚ ㅟ ㅢ va boshqa qo'shma unlilarni o'qish.",
+      tip: "Qo'shma unli — ikki unlini tez aytish: ㅗ + ㅏ = ㅘ (wa). ㅙ, ㅚ, ㅞ uchalasi ham amalda «we» deb o'qiladi.",
+      letters: [
+        ["와", "wa", "ㅗ + ㅏ"],
+        ["워", "wo", "ㅜ + ㅓ"],
+        ["위", "wi", "ㅜ + ㅣ"],
+        ["의", "ɨy", "ㅡ + ㅣ. «-ning» qo'shimchasi bo'lsa «e» o'qiladi"],
+        ["외", "we", "ㅗ + ㅣ"],
+        ["왜", "we", "ㅗ + ㅐ. «Nega?» so'zi"],
+        ["웨", "we", "ㅜ + ㅔ"],
+        ["예", "ye", "ㅕ + ㅣ"],
+        ["얘", "ye", "ㅑ + ㅣ. Kam uchraydi"]
+      ],
+      words: [["사과", "olma"], ["회사", "kompaniya"], ["의사", "shifokor"], ["의자", "stul"], ["귀", "quloq"], ["돼지", "cho'chqa"], ["시계", "soat"], ["뭐", "nima"], ["과자", "pechenye"], ["샤워", "dush"], ["가위", "qaychi"], ["쥐", "sichqon"]]
+    },
+    {
+      id: "h6", type: "hangul", t: "Patchim — ostki undosh", k: "받침",
+      goal: "Bo'g'in ostidagi undoshni (받침) o'qish va tovush ulanishini tushunish.",
+      tip: "Endi ko'chadagi yozuvlarni o'qiy olasiz: 편의점, 화장실, 지하철 — bularning hammasini Koreyada ko'rgansiz.",
+      intro: "<p>Bo'g'in ostida undosh bo'lsa, u <b>patchim</b> (받침) deyiladi. Ostda faqat <b>7 xil tovush</b> eshitiladi:</p><ul><li><b class='ko'>ㄱ ㅋ ㄲ</b> → k</li><li><b class='ko'>ㄴ</b> → n, <b class='ko'>ㄹ</b> → l, <b class='ko'>ㅁ</b> → m, <b class='ko'>ㅇ</b> → ng</li><li><b class='ko'>ㄷ ㅅ ㅆ ㅈ ㅊ ㅌ ㅎ</b> → t</li><li><b class='ko'>ㅂ ㅍ</b> → p</li></ul><p><b>Ulanish:</b> keyingi bo'g'in ㅇ bilan boshlansa, patchim o'sha joyga ko'chadi: <b class='ko'>한국어</b> → «han-gu-go», <b class='ko'>음악</b> → «ɨ-mak».</p>",
+      letters: [
+        ["각", "gak", "Ostda ㄱ → k"],
+        ["간", "gan", "Ostda ㄴ → n"],
+        ["갇", "gat", "Ostda ㄷ → t"],
+        ["갈", "gal", "Ostda ㄹ → l"],
+        ["감", "gam", "Ostda ㅁ → m"],
+        ["갑", "gap", "Ostda ㅂ → p"],
+        ["강", "gang", "Ostda ㅇ → ng"]
+      ],
+      words: [["한국", "Koreya"], ["서울", "Seul"], ["김치", "kimchi"], ["지하철", "metro"], ["선생님", "o'qituvchi"], ["학생", "talaba, o'quvchi"], ["컴퓨터", "kompyuter"], ["핸드폰", "telefon"], ["편의점", "24 soatlik do'kon"], ["화장실", "hojatxona"], ["물", "suv"], ["밥", "guruch, ovqat"], ["집", "uy"], ["책", "kitob"], ["한국어", "koreys tili"], ["음악", "musiqa"]]
+    },
+    {
+      id: "ht", type: "test", t: "Hangul nazorati", k: "한글 시험",
+      goal: "Hangulni allaqachon o'qiy olsangiz, shu testdan o'tib, birdaniga 2-liniyaga o'ting.",
+      qs: [
+        { q: "«kho-phi» (qahva) qaysi biri?", opts: ["커피", "코피", "거비", "카페"], a: 0, exp: "ㅋ + ㅓ = 커, ㅍ + ㅣ = 피." },
+        { q: "Qanday o'qiladi?", text: "지하철", opts: ["ji-ha-chol", "chi-ga-chol", "ji-ha-chul", "ja-ho-chol"], a: 0, exp: "지 ji · 하 ha · 철 chol (ㅓ = ochiq o)." },
+        { q: "Bu yozuv qayerda uchraydi?", text: "화장실", opts: ["Hojatxona eshigida", "Avtobus bekatida", "Bankda", "Menyuda"], a: 0, exp: "화장실 — hojatxona." },
+        { q: "Eshitgan so'zingizni tanlang.", audio: "선생님", opts: ["선생님", "손생님", "선샘닌", "산생님"], a: 0, exp: "선생님 — o'qituvchi." },
+        { q: "Eshitgan so'zingizni tanlang.", audio: "의사", opts: ["의사", "이사", "의자", "외사"], a: 0, exp: "의사 — shifokor. 의자 — stul." },
+        { q: "한국어 qanday o'qiladi?", opts: ["han-gu-go", "han-guk-o", "han-gung-o", "hang-u-go"], a: 0, exp: "Patchim ㄱ keyingi ㅇ o'rniga ko'chadi." },
+        { q: "Ostki ㅅ (masalan 옷) qanday eshitiladi?", opts: ["t", "s", "sh", "n"], a: 0, exp: "ㄷ ㅅ ㅆ ㅈ ㅊ ㅌ ㅎ — ostda hammasi «t»." },
+        { q: "«pomidor» qaysi biri?", opts: ["토마토", "도마도", "토모토", "타마타"], a: 0, exp: "토마토 — tho-ma-tho." },
+        { q: "Eshitgan so'zingizni tanlang.", audio: "편의점", opts: ["편의점", "변의점", "편이잠", "평의점"], a: 0, exp: "편의점 — 24 soatlik do'kon." },
+        { q: "Qaysi juftlik bir xil o'qiladi?", opts: ["애 — 에", "오 — 어", "우 — 으", "가 — 카"], a: 0, exp: "ㅐ va ㅔ hozirgi koreys tilida bir xil «e»." }
+      ]
+    }
+  ]
+});
+
+STAGES.push({
+  id: "a", line: 2, color: "#00A84D", name: "Tanishuv", ko: "만남",
+  lessons: [
+    {
+      id: "a1", type: "lesson", t: "Salomlashish", k: "인사",
+      goal: "Salomlashish, xayrlashish, rahmat va uzr aytish; o'zingizni tanishtirish.",
+      tip: "Bu iboralarni Koreyada yuzlab marta eshitgansiz — endi ularni aniq yozuvi bilan bog'laymiz.",
+      v: [
+        ["안녕하세요", "Assalomu alaykum"],
+        ["안녕히 가세요", "Xayr (ketayotgan odamga)", "So'zma-so'z: tinch boring"],
+        ["안녕히 계세요", "Xayr (qolayotgan odamga)", "So'zma-so'z: tinch qoling"],
+        ["감사합니다", "Rahmat"],
+        ["죄송합니다", "Kechirasiz"],
+        ["괜찮아요", "Hechqisi yo'q"],
+        ["네", "Ha"],
+        ["아니요", "Yo'q"],
+        ["저", "men (kamtarona)"],
+        ["이름", "ism"],
+        ["사람", "odam"],
+        ["반갑습니다", "Tanishganimdan xursandman"]
+      ],
+      g: [
+        {
+          p: "저는 N입니다 / N이에요·예요", uz: "Men N-man",
+          d: "Xuddi o'zbekchadagidek kesim gap oxirida turadi. 입니다 — rasmiy, 이에요/예요 — kundalik xushmuomala shakl. Ot undosh bilan tugasa 이에요, unli bilan tugasa 예요.",
+          ex: [["저는 아지즈입니다.", "Men Azizman."], ["저는 학생이에요.", "Men talabaman."], ["제 이름은 민수예요.", "Mening ismim Minsu."]]
+        }
+      ],
+      c: [
+        ["저는 학생___.", "이에요", ["예요", "은", "는"], "Men talabaman."],
+        ["제 이름은 민수___.", "예요", ["이에요", "를", "에"], "Mening ismim Minsu."],
+        ["가: 죄송합니다.  나: ___.", "괜찮아요", ["감사합니다", "안녕하세요", "반갑습니다"], "— Kechirasiz. — Hechqisi yo'q."],
+        ["(Siz ketyapsiz, do'stingiz qolyapti)  ___!", "안녕히 계세요", ["안녕히 가세요", "반갑습니다", "죄송합니다"], "Xayr! (qolayotgan odamga)"]
+      ]
+    },
+    {
+      id: "a2", type: "lesson", t: "Men kimman", k: "자기소개",
+      goal: "Millat va kasbni aytish; «emas» deyish.",
+      tip: "은/는 — o'zbekchadagi «esa / -chi» ga yaqin: gap nima haqida ekanini belgilaydi.",
+      v: [
+        ["우즈베키스탄", "O'zbekiston"], ["한국", "Koreya"], ["미국", "AQSh"], ["학생", "talaba"],
+        ["회사원", "ofis xodimi"], ["선생님", "o'qituvchi"], ["의사", "shifokor"], ["친구", "do'st"],
+        ["한국어", "koreys tili"], ["영어", "ingliz tili"], ["나라", "davlat"], ["직업", "kasb"], ["어느", "qaysi"]
+      ],
+      g: [
+        {
+          p: "N은/는", uz: "N esa, N — (mavzu)",
+          d: "Gap mavzusini bildiradi. Undoshdan keyin 은, unlidan keyin 는. «Davlat + 사람» = millat: 한국 사람 — koreys.",
+          ex: [["저는 우즈베키스탄 사람이에요.", "Men o'zbekistonlikman."], ["제 친구는 의사예요.", "Mening do'stim shifokor."], ["선생님은 한국 사람입니다.", "O'qituvchi koreys."]]
+        },
+        {
+          p: "N이/가 아니에요", uz: "N emas",
+          d: "Inkor. Undoshdan keyin 이, unlidan keyin 가 qo'yiladi, keyin 아니에요.",
+          ex: [["저는 학생이 아니에요.", "Men talaba emasman."], ["저는 의사가 아니에요.", "Men shifokor emasman."]]
+        }
+      ],
+      c: [
+        ["저___ 회사원이에요.", "는", ["은", "이", "를"], "Men ofis xodimiman."],
+        ["선생님___ 한국 사람이에요.", "은", ["는", "가", "를"], "O'qituvchi koreys."],
+        ["저는 학생___ 아니에요.", "이", ["가", "은", "를"], "Men talaba emasman."],
+        ["가: 어느 나라 사람이에요?  나: 우즈베키스탄 ___이에요.", "사람", ["직업", "이름", "영어"], "— Qaysi davlatdansiz? — O'zbekistonlikman."]
+      ]
+    },
+    {
+      id: "a3", type: "lesson", t: "Bu nima?", k: "이게 뭐예요?",
+      goal: "Narsalarni ko'rsatib so'rash va nomlash; «kimning» ekanini aytish.",
+      tip: "의 = o'zbekcha «-ning». 이/가 — ega qo'shimchasi: yangi ma'lumot yoki «nima? kim?» ga javob.",
+      v: [
+        ["이것", "bu (narsa)", "Og'zaki: 이거"], ["그것", "shu, o'sha (sizdagi)"], ["저것", "anavi (uzoqdagi)"],
+        ["뭐", "nima", "To'liq shakli: 무엇"], ["누구", "kim"], ["책", "kitob"], ["가방", "sumka"], ["휴대폰", "telefon"],
+        ["물", "suv"], ["커피", "qahva"], ["컴퓨터", "kompyuter"], ["의자", "stul"], ["책상", "parta, yozuv stoli"]
+      ],
+      g: [
+        {
+          p: "이게 뭐예요? — N이에요/예요", uz: "Bu nima? — N",
+          d: "이게 = 이것이 (bu). 그게 = 그것이, 저게 = 저것이. 이 / 그 / 저 otdan oldin ham keladi: 이 책 — bu kitob.",
+          ex: [["이게 뭐예요?", "Bu nima?"], ["그것은 한국어 책이에요.", "U koreys tili kitobi."], ["저 사람은 누구예요?", "Anavi odam kim?"]]
+        },
+        {
+          p: "N의 N", uz: "N-ning N",
+          d: "Egalik. 저의 → 제 (mening), 나의 → 내. Og'zaki nutqda 의 ko'pincha tushib qoladi: 친구 가방.",
+          ex: [["이것은 제 가방이에요.", "Bu mening sumkam."], ["이것은 친구의 휴대폰이에요.", "Bu do'stimning telefoni."]]
+        }
+      ],
+      c: [
+        ["이게 ___예요?", "뭐", ["누구", "어느", "저"], "Bu nima?"],
+        ["저 사람은 ___예요?", "누구", ["뭐", "이것", "책"], "Anavi odam kim?"],
+        ["이것은 선생님___ 책이에요.", "의", ["은", "가", "를"], "Bu o'qituvchining kitobi."],
+        ["이것은 ___ 컴퓨터예요.", "제", ["저", "저는", "저것"], "Bu mening kompyuterim."]
+      ]
+    },
+    {
+      id: "a4", type: "lesson", t: "Qayerda? Bor va yo'q", k: "어디에 있어요?",
+      goal: "Narsa va joyning qayerdaligini aytish; «bor / yo'q».",
+      tip: "에 = o'zbekcha «-da» (turgan joy). 있어요 / 없어요 = «bor / yo'q» — tuzilishi o'zbekcha bilan bir xil: Menda vaqt yo'q → 저는 시간이 없어요.",
+      v: [
+        ["있어요", "bor"], ["없어요", "yo'q"], ["어디", "qayer"], ["여기", "bu yer"], ["저기", "anavi yer"],
+        ["집", "uy"], ["학교", "maktab, universitet"], ["회사", "kompaniya, ish joyi"], ["화장실", "hojatxona"],
+        ["편의점", "24 soatlik do'kon"], ["은행", "bank"], ["위", "ust"], ["아래", "ost"], ["앞", "old"], ["뒤", "orqa"], ["안", "ich"], ["옆", "yon"]
+      ],
+      g: [
+        {
+          p: "N이/가 N에 있어요 / 없어요", uz: "N N-da bor / yo'q",
+          d: "Joy + 에. O'rin bildiruvchi so'z otdan keyin keladi, xuddi o'zbekchadagidek: 책상 위에 — parta ustida.",
+          ex: [["화장실이 어디에 있어요?", "Hojatxona qayerda?"], ["편의점은 은행 옆에 있어요.", "Do'kon bankning yonida."], ["책이 가방 안에 있어요.", "Kitob sumkaning ichida."], ["저는 지금 시간이 없어요.", "Hozir vaqtim yo'q."]]
+        },
+        {
+          p: "N도", uz: "N ham",
+          d: "도 은/는 va 이/가 o'rniga qo'yiladi.",
+          ex: [["저도 학생이에요.", "Men ham talabaman."], ["여기에 은행도 있어요.", "Bu yerda bank ham bor."]]
+        }
+      ],
+      c: [
+        ["화장실이 어디___ 있어요?", "에", ["를", "은", "의"], "Hojatxona qayerda?"],
+        ["휴대폰이 책상 ___에 있어요.", "위", ["어디", "여기", "누구"], "Telefon parta ustida."],
+        ["저___ 우즈베키스탄 사람이에요.", "도", ["에", "의", "를"], "Men ham o'zbekistonlikman."],
+        ["가: 물 있어요?  나: 아니요, ___.", "없어요", ["있어요", "괜찮아요", "아니에요"], "— Suv bormi? — Yo'q."]
+      ]
+    },
+    {
+      id: "a5", type: "lesson", t: "Sonlar 1: narx va raqam", k: "숫자 1",
+      goal: "Xitoycha-koreyscha sonlar: narx, telefon raqami, sana.",
+      tip: "Koreys tilida ikki xil son bor. Bu qatori — pul, sana, daqiqa, telefon raqami uchun. Do'kondagi «천 원, 만 원» shu qatordan.",
+      v: [
+        ["일", "1"], ["이", "2"], ["삼", "3"], ["사", "4"], ["오", "5"], ["육", "6"], ["칠", "7"], ["팔", "8"], ["구", "9"], ["십", "10"],
+        ["백", "100"], ["천", "1 000"], ["만", "10 000"], ["원", "von (pul birligi)"], ["얼마", "qancha"], ["번", "raqam, -nchi"], ["월", "oy (sana)"], ["년", "yil"]
+      ],
+      g: [
+        {
+          p: "얼마예요? — N원이에요", uz: "Qancha turadi? — N von",
+          d: "Sonlar o'zbekchadagidek ulanadi: 십오 = 15, 이십 = 20, 삼백 = 300. Koreyada minglar emas, 10 000 (만) asosiy birlik: 50 000 = 오만.",
+          ex: [["이거 얼마예요?", "Bu qancha turadi?"], ["커피는 사천오백 원이에요.", "Qahva 4 500 von."], ["오늘은 시월 구일이에요.", "Bugun 9-oktabr."]]
+        }
+      ],
+      c: [
+        ["이거 ___예요?", "얼마", ["뭐", "누구", "어디"], "Bu qancha turadi?"],
+        ["15 = ___", "십오", ["오십", "십육", "일오"], "o'n besh"],
+        ["30 000 원 = ___ 원", "삼만", ["삼천", "삼백", "사만"], "o'ttiz ming von"],
+        ["2 500 원 = ___ 원", "이천오백", ["이백오십", "이만오천", "오천이백"], "ikki ming besh yuz von"]
+      ]
+    },
+    {
+      id: "a6", type: "lesson", t: "Birinchi fe'llar", k: "동사 1",
+      goal: "Hozirgi zamonda gapirish va «-ni» qo'shimchasini ishlatish.",
+      tip: "Bu — eng muhim dars. -아요/어요 shakli kundalik nutqning 80 foizi. 을/를 = o'zbekcha «-ni».",
+      v: [
+        ["가다", "bormoq"], ["오다", "kelmoq"], ["먹다", "yemoq"], ["마시다", "ichmoq"], ["보다", "ko'rmoq"],
+        ["하다", "qilmoq"], ["공부하다", "o'qimoq, o'rganmoq"], ["일하다", "ishlamoq"], ["자다", "uxlamoq"],
+        ["사다", "sotib olmoq"], ["만나다", "uchrashmoq"], ["읽다", "o'qimoq (matn)"], ["좋아하다", "yaxshi ko'rmoq"]
+      ],
+      g: [
+        {
+          p: "V-아요 / V-어요 / 해요", uz: "hozirgi zamon (xushmuomala)",
+          d: "다 ni olib tashlang. Oxirgi unli ㅏ yoki ㅗ bo'lsa +아요 (가다 → 가요, 오다 → 와요), boshqa unli bo'lsa +어요 (먹다 → 먹어요, 마시다 → 마셔요), 하다 → 해요. Shaxsga qarab o'zgarmaydi: 가요 = boraman, borasan, boradi.",
+          ex: [["저는 학교에 가요.", "Men maktabga boraman."], ["친구가 집에 와요.", "Do'stim uyga keladi."], ["저는 한국어를 공부해요.", "Men koreys tilini o'rganaman."]]
+        },
+        {
+          p: "N을/를", uz: "N-ni",
+          d: "Tushum kelishigi. Undoshdan keyin 을, unlidan keyin 를.",
+          ex: [["저는 밥을 먹어요.", "Men ovqat yeyman."], ["친구는 커피를 마셔요.", "Do'stim qahva ichadi."], ["저는 책을 읽어요.", "Men kitob o'qiyman."]]
+        }
+      ],
+      c: [
+        ["저는 물___ 마셔요.", "을", ["를", "이", "에"], "Men suv ichaman."],
+        ["저는 친구___ 만나요.", "를", ["을", "은", "의"], "Men do'stim bilan uchrashaman."],
+        ["먹다 → ___", "먹어요", ["먹아요", "먹해요", "먹요"], "yeyman / yeydi"],
+        ["오다 → ___", "와요", ["오요", "워요", "오어요"], "kelaman / keladi"],
+        ["공부하다 → ___", "공부해요", ["공부하요", "공부아요", "공부허요"], "o'rganaman"]
+      ]
+    },
+    {
+      id: "at", type: "test", t: "Nazorat: 2-liniya", k: "환승 시험",
+      goal: "TOPIK I formatidagi savollar. 80% va undan yuqori — 3-liniya ochiladi.",
+      qs: [
+        { q: "TOPIK 읽기 31-tur. Nima haqida?", text: "저는 학생입니다. 친구는 의사입니다.", opts: ["직업", "이름", "나라", "집"], a: 0, exp: "Talaba, shifokor — gap kasb (직업) haqida." },
+        { q: "TOPIK 읽기 31-tur. Nima haqida?", text: "저는 우즈베키스탄 사람이에요. 선생님은 한국 사람이에요.", opts: ["나라", "직업", "책", "회사"], a: 0, exp: "O'zbekistonlik, koreys — gap davlat (나라) haqida." },
+        { q: "TOPIK 듣기 1-tur. To'g'ri javobni tanlang.", audio: "학생이에요?", opts: ["네, 학생이에요.", "네, 학생이 아니에요.", "아니요, 학생이에요.", "네, 학생이 없어요."], a: 0, exp: "Savol: «Talabamisiz?» — Ha, talabaman." },
+        { q: "TOPIK 듣기 1-tur. To'g'ri javobni tanlang.", audio: "가방이 있어요?", opts: ["아니요, 가방이 없어요.", "아니요, 가방이 아니에요.", "네, 가방이에요.", "네, 가방이 없어요."], a: 0, exp: "«Bormi?» savoliga «yo'q» = 없어요. 아니에요 — «emas»." },
+        { q: "TOPIK 듣기 5-tur. Davom ettiring.", audio: "감사합니다.", opts: ["아니에요.", "반갑습니다.", "안녕히 가세요.", "죄송합니다."], a: 0, exp: "Rahmatga javob: 아니에요 (arzimaydi)." },
+        { q: "TOPIK 읽기 34-tur. Bo'sh joyga mos so'z.", text: "저는 편의점에서 물을 (   ).", opts: ["사요", "자요", "와요", "읽어요"], a: 0, exp: "Do'konda suv sotib olaman — 사요." },
+        { q: "TOPIK 읽기 34-tur. Bo'sh joyga mos so'z.", text: "화장실이 은행 옆(   ) 있어요.", opts: ["에", "을", "는", "의"], a: 0, exp: "Joy + 에 있어요." },
+        { q: "Narxni toping.", audio: "이 책은 만 오천 원이에요.", opts: ["15 000 원", "1 500 원", "50 000 원", "10 500 원"], a: 0, exp: "만 (10 000) + 오천 (5 000)." },
+        { q: "TOPIK 읽기 43-tur. Matnga mos gap.", text: "저는 회사원이에요. 회사는 서울에 있어요. 회사 앞에 편의점이 있어요.", opts: ["회사 앞에 편의점이 있어요.", "저는 학생이에요.", "회사는 편의점 안에 있어요.", "서울에 회사가 없어요."], a: 0, exp: "Matnda: kompaniya oldida do'kon bor." },
+        { q: "To'g'ri shaklni tanlang.", text: "저는 커피(   ) 마셔요.", opts: ["를", "을", "가", "에"], a: 0, exp: "커피 unli bilan tugaydi → 를." }
+      ]
+    }
+  ]
+});
+
+STAGES.push({
+  id: "b", line: 3, color: "#EF7C1C", name: "Kundalik hayot", ko: "일상",
+  lessons: [
+    {
+      id: "b1", type: "lesson", t: "Qayerga? Qayerda?", k: "장소",
+      goal: "Borish yo'nalishi va ish-harakat joyini farqlash.",
+      tip: "에 = «-ga» (boraman) yoki «-da» (bor, turadi). 에서 = harakat bajariladigan joy «-da» yoki «-dan». Ya'ni: 식당에 가요 (oshxonaga boraman), 식당에서 먹어요 (oshxonada yeyman).",
+      v: [
+        ["식당", "oshxona, restoran"], ["카페", "kafe"], ["시장", "bozor"], ["병원", "shifoxona"], ["공원", "park"],
+        ["도서관", "kutubxona"], ["영화관", "kinoteatr"], ["백화점", "univermag"], ["지하철역", "metro bekati"],
+        ["공항", "aeroport"], ["마트", "supermarket"], ["가게", "do'kon"], ["어디", "qayer"]
+      ],
+      g: [
+        {
+          p: "N에 가요 / 와요", uz: "N-ga boraman / kelaman",
+          d: "Yo'nalish. 가다, 오다, 다니다 kabi harakat fe'llari bilan.",
+          ex: [["어디에 가요?", "Qayerga ketyapsiz?"], ["저는 지금 병원에 가요.", "Men hozir shifoxonaga ketyapman."]]
+        },
+        {
+          p: "N에서 V", uz: "N-da (ish qilmoq)",
+          d: "Harakat sodir bo'ladigan joy. Shuningdek «-dan»: 우즈베키스탄에서 왔어요 — O'zbekistondan keldim.",
+          ex: [["저는 도서관에서 공부해요.", "Men kutubxonada o'qiyman."], ["친구는 카페에서 일해요.", "Do'stim kafeda ishlaydi."], ["시장에서 과일을 사요.", "Bozordan meva sotib olaman."]]
+        }
+      ],
+      c: [
+        ["저는 공항___ 가요.", "에", ["에서", "을", "는"], "Men aeroportga boraman."],
+        ["저는 식당___ 밥을 먹어요.", "에서", ["에", "를", "이"], "Men oshxonada ovqat yeyman."],
+        ["영화관___ 영화를 봐요.", "에서", ["에", "의", "도"], "Kinoteatrda kino ko'raman."],
+        ["친구가 집___ 와요.", "에", ["에서", "을", "의"], "Do'stim uyga keladi."]
+      ]
+    },
+    {
+      id: "b2", type: "lesson", t: "Sonlar 2: sanash", k: "숫자 2",
+      goal: "Sof koreyscha sonlar va sanoq so'zlari bilan buyurtma berish.",
+      tip: "Bu qator — narsa, odam, yosh va soatni sanash uchun. Kafedagi «아메리카노 한 잔 주세요» shu yerdan.",
+      v: [
+        ["하나", "1 (bitta)", "Sanoq so'z oldida: 한"], ["둘", "2", "Sanoq so'z oldida: 두"], ["셋", "3", "Sanoq so'z oldida: 세"], ["넷", "4", "Sanoq so'z oldida: 네"],
+        ["다섯", "5"], ["여섯", "6"], ["일곱", "7"], ["여덟", "8"], ["아홉", "9"], ["열", "10"], ["스물", "20", "Sanoq so'z oldida: 스무"],
+        ["개", "dona"], ["명", "nafar (odam)"], ["잔", "stakan, finjon"], ["병", "shisha"], ["살", "yosh"], ["몇", "nechta"]
+      ],
+      g: [
+        {
+          p: "N + son + sanoq so'z", uz: "son + dona N",
+          d: "Tartib o'zbekchadan farq qiladi: avval narsa, keyin son va sanoq so'z. 하나, 둘, 셋, 넷 → 한, 두, 세, 네 ga qisqaradi.",
+          ex: [["사과 세 개 있어요.", "Uchta olma bor."], ["학생이 다섯 명 있어요.", "Besh nafar talaba bor."], ["저는 스물다섯 살이에요.", "Men yigirma besh yoshdaman."]]
+        },
+        {
+          p: "N 주세요", uz: "N bering (iltimos)",
+          d: "Buyurtma va iltimosning eng oddiy shakli.",
+          ex: [["커피 한 잔 주세요.", "Bir finjon qahva bering."], ["물 두 병 주세요.", "Ikki shisha suv bering."]]
+        }
+      ],
+      c: [
+        ["커피 ___ 잔 주세요. (1)", "한", ["하나", "일", "두"], "Bitta qahva bering."],
+        ["친구가 ___ 명 있어요. (3)", "세", ["셋", "삼", "네"], "Uchta do'stim bor."],
+        ["가: ___ 살이에요?  나: 스무 살이에요.", "몇", ["뭐", "얼마", "어디"], "— Necha yoshdasiz? — Yigirmada."],
+        ["물 두 ___ 주세요.", "병", ["명", "살", "원"], "Ikki shisha suv bering."]
+      ]
+    },
+    {
+      id: "b3", type: "lesson", t: "Vaqt", k: "시간",
+      goal: "Soatni aytish va kun tartibini tasvirlash.",
+      tip: "Diqqat: soat — sof koreyscha (한 시, 두 시), daqiqa — xitoycha (십 분, 삼십 분). 3:30 = 세 시 삼십 분 yoki 세 시 반.",
+      v: [
+        ["시", "soat (nechchi)"], ["분", "daqiqa"], ["반", "yarim"], ["오전", "tushgacha (AM)"], ["오후", "tushdan keyin (PM)"],
+        ["지금", "hozir"], ["오늘", "bugun"], ["내일", "ertaga"], ["어제", "kecha"], ["아침", "ertalab; nonushta"],
+        ["점심", "tush; tushlik"], ["저녁", "kechqurun; kechki ovqat"], ["밤", "tun"], ["언제", "qachon"], ["매일", "har kuni"]
+      ],
+      g: [
+        {
+          p: "vaqt + 에", uz: "vaqt + -da",
+          d: "Soat, kun qismi, sana bilan 에 keladi. 오늘, 내일, 어제, 지금, 매일 bilan 에 qo'yilmaydi.",
+          ex: [["저는 일곱 시에 일어나요.", "Men soat yettida turaman."], ["지금 몇 시예요?", "Hozir soat nechchi?"], ["오후 두 시 반에 친구를 만나요.", "Tushdan keyin ikki yarimda do'stim bilan uchrashaman."]]
+        },
+        {
+          p: "N부터 N까지", uz: "N-dan N-gacha (vaqt)",
+          d: "Vaqt oralig'i. Joy uchun 에서 ~ 까지 ishlatiladi.",
+          ex: [["아홉 시부터 여섯 시까지 일해요.", "Soat to'qqizdan oltigacha ishlayman."], ["오전부터 오후까지 공부해요.", "Ertalabdan tushdan keyingacha o'qiyman."]]
+        }
+      ],
+      c: [
+        ["지금 ___ 시예요?", "몇", ["뭐", "언제", "얼마"], "Hozir soat nechchi?"],
+        ["저는 여덟 시___ 회사에 가요.", "에", ["에서", "를", "은"], "Men soat sakkizda ishga boraman."],
+        ["한 시___ 두 시까지 점심을 먹어요.", "부터", ["까지", "에서", "에"], "Birdan ikkigacha tushlik qilaman."],
+        ["3:30 = 세 시 ___", "반", ["분", "밤", "번"], "uch yarim"]
+      ]
+    },
+    {
+      id: "b4", type: "lesson", t: "Hafta va o'tgan zamon", k: "요일 · 과거",
+      goal: "Hafta kunlari; kecha nima qilganingizni aytish.",
+      tip: "O'tgan zamon — hozirgi zamon shakliga ㅆ qo'shish: 가요 → 갔어요, 먹어요 → 먹었어요, 해요 → 했어요.",
+      v: [
+        ["월요일", "dushanba"], ["화요일", "seshanba"], ["수요일", "chorshanba"], ["목요일", "payshanba"], ["금요일", "juma"],
+        ["토요일", "shanba"], ["일요일", "yakshanba"], ["주말", "dam olish kunlari"], ["지난주", "o'tgan hafta"],
+        ["이번 주", "shu hafta"], ["다음 주", "kelasi hafta"], ["무슨", "qanday, qaysi"], ["쉬다", "dam olmoq"]
+      ],
+      g: [
+        {
+          p: "V-았어요 / V-었어요 / 했어요", uz: "o'tgan zamon: -di",
+          d: "ㅏ, ㅗ → 았어요 (가다 → 갔어요, 보다 → 봤어요). Boshqa unlilar → 었어요 (먹다 → 먹었어요, 마시다 → 마셨어요). 하다 → 했어요. Ot bilan: 이었어요 / 였어요.",
+          ex: [["어제 친구를 만났어요.", "Kecha do'stim bilan uchrashdim."], ["주말에 집에서 쉬었어요.", "Dam olish kunlari uyda dam oldim."], ["지난주에 한국어를 공부했어요.", "O'tgan hafta koreys tilini o'rgandim."]]
+        }
+      ],
+      c: [
+        ["어제 영화를 ___.", "봤어요", ["봐요", "보요", "봤아요"], "Kecha kino ko'rdim."],
+        ["지난주에 시장에 ___.", "갔어요", ["가요", "갔었요", "가었어요"], "O'tgan hafta bozorga bordim."],
+        ["아침에 빵을 ___.", "먹었어요", ["먹았어요", "먹어요", "먹했어요"], "Ertalab non yedim."],
+        ["오늘은 ___ 요일이에요?", "무슨", ["몇", "누구", "어디"], "Bugun haftaning qaysi kuni?"],
+        ["토요일, 일요일 = ___", "주말", ["매일", "오전", "지난주"], "dam olish kunlari"]
+      ]
+    },
+    {
+      id: "b5", type: "lesson", t: "Inkor va sifatlar", k: "부정 · 형용사",
+      goal: "«Qilmayman», «qila olmayman» deyish va narsalarni tasvirlash.",
+      tip: "Koreys tilida sifat ham fe'l kabi tuslanadi: 좋다 → 좋아요 (yaxshi), 좋았어요 (yaxshi edi).",
+      v: [
+        ["좋다", "yaxshi"], ["나쁘다", "yomon"], ["크다", "katta"], ["작다", "kichik"], ["많다", "ko'p"], ["적다", "kam"],
+        ["비싸다", "qimmat"], ["싸다", "arzon"], ["맛있다", "mazali"], ["맛없다", "bemaza"], ["재미있다", "qiziqarli"],
+        ["바쁘다", "band"], ["아주", "juda"], ["조금", "ozgina"]
+      ],
+      g: [
+        {
+          p: "안 V / V-지 않아요", uz: "-maydi (xohlamaydi yoki shunchaki yo'q)",
+          d: "안 fe'ldan oldin turadi. 하다-fe'llarda ot va 하다 orasiga kiradi: 공부 안 해요. Uzun shakli -지 않아요 yozma nutqda va TOPIKda ko'p uchraydi.",
+          ex: [["저는 커피를 안 마셔요.", "Men qahva ichmayman."], ["오늘은 바쁘지 않아요.", "Bugun band emasman."], ["이 가방은 안 비싸요.", "Bu sumka qimmat emas."]]
+        },
+        {
+          p: "못 V", uz: "-a olmaydi",
+          d: "Imkoniyat yo'qligi. 안 — «qilmayman», 못 — «qila olmayman».",
+          ex: [["저는 오늘 학교에 못 가요.", "Men bugun maktabga bora olmayman."], ["어제 숙제를 못 했어요.", "Kecha uy vazifasini qila olmadim."]]
+        }
+      ],
+      c: [
+        ["이 식당은 아주 ___. (mazali)", "맛있어요", ["맛없어요", "비싸요", "바빠요"], "Bu oshxona juda mazali."],
+        ["저는 고기를 ___ 먹어요. (yemayman)", "안", ["못", "도", "아주"], "Men go'sht yemayman."],
+        ["시간이 없어요. 그래서 ___ 가요.", "못", ["아주", "조금", "많이"], "Vaqtim yo'q. Shuning uchun bora olmayman."],
+        ["오늘은 바쁘___ 않아요.", "지", ["안", "가", "에"], "Bugun band emasman."],
+        ["크다 ↔ ___", "작다", ["적다", "싸다", "많다"], "katta ↔ kichik"]
+      ]
+    },
+    {
+      id: "b6", type: "lesson", t: "Oila va hurmat", k: "가족",
+      goal: "Oila a'zolari; kattalar haqida hurmat bilan gapirish.",
+      tip: "O'zbekchadagi «aka / opa / uka» tizimi koreyschada ham bor, faqat gapiruvchining jinsiga ham bog'liq: erkak «형, 누나», ayol «오빠, 언니» deydi.",
+      v: [
+        ["가족", "oila"], ["아버지", "ota"], ["어머니", "ona"], ["부모님", "ota-ona"], ["형", "aka (erkak uchun)"],
+        ["오빠", "aka (ayol uchun)"], ["누나", "opa (erkak uchun)"], ["언니", "opa (ayol uchun)"], ["동생", "uka, singil"],
+        ["남편", "er"], ["아내", "xotin"], ["아이", "bola"], ["할머니", "buvi"], ["할아버지", "bobo"], ["살다", "yashamoq"]
+      ],
+      g: [
+        {
+          p: "V-(으)세요", uz: "hurmat shakli: -adilar",
+          d: "Kattalar va notanish odamlar haqida. Unlidan keyin 세요, undoshdan keyin 으세요: 가다 → 가세요, 읽다 → 읽으세요. Maxsus: 있다 → 계세요, 먹다 → 드세요, 자다 → 주무세요.",
+          ex: [["아버지는 회사에 가세요.", "Otam ishga boradilar."], ["할머니는 집에 계세요.", "Buvim uydalar."], ["부모님은 우즈베키스탄에 사세요.", "Ota-onam O'zbekistonda yashaydilar."]]
+        },
+        {
+          p: "N하고 N / N하고 같이", uz: "N va N / N bilan birga",
+          d: "하고 — og'zaki nutqda. Yozma nutqda 와/과 ishlatiladi (unlidan keyin 와, undoshdan keyin 과).",
+          ex: [["저는 동생하고 같이 살아요.", "Men ukam bilan birga yashayman."], ["형하고 누나가 있어요.", "Akam va opam bor."]]
+        }
+      ],
+      c: [
+        ["어머니는 지금 집에 ___.", "계세요", ["있어요", "가요", "이에요"], "Onam hozir uydalar."],
+        ["저는 친구___ 같이 영화를 봤어요.", "하고", ["에서", "를", "의"], "Do'stim bilan birga kino ko'rdim."],
+        ["할아버지는 책을 ___.", "읽으세요", ["읽세요", "읽어세요", "읽으요"], "Bobom kitob o'qiydilar."],
+        ["아버지 + 어머니 = ___", "부모님", ["동생", "남편", "가족"], "ota-ona"]
+      ]
+    },
+    {
+      id: "bt", type: "test", t: "Nazorat: 3-liniya", k: "환승 시험",
+      goal: "TOPIK I formatidagi savollar. 80% va undan yuqori — 4-liniya ochiladi.",
+      qs: [
+        { q: "TOPIK 듣기 7-tur. Bu qayer?", audio: "커피 한 잔 주세요. 네, 사천 원입니다.", opts: ["카페", "병원", "도서관", "은행"], a: 0, exp: "«Bir finjon qahva bering» — kafe." },
+        { q: "TOPIK 듣기 7-tur. Bu qayer?", audio: "한국어 책이 어디에 있어요? 한국어 책은 저기에 있어요.", opts: ["도서관", "공항", "영화관", "식당"], a: 0, exp: "Kitob qidirilmoqda — kutubxona." },
+        { q: "TOPIK 듣기 1-tur. To'g'ri javobni tanlang.", audio: "어제 뭐 했어요?", opts: ["친구를 만났어요.", "친구를 만나요.", "내일 만나요.", "친구가 없어요."], a: 0, exp: "Savol o'tgan zamonda — javob ham: 만났어요." },
+        { q: "TOPIK 듣기 3-tur. To'g'ri javobni tanlang.", audio: "몇 시에 일어나요?", opts: ["일곱 시에 일어나요.", "집에서 일어나요.", "매일 일어나요.", "일곱 명이에요."], a: 0, exp: "«Soat nechada?» — 일곱 시에." },
+        { q: "TOPIK 읽기 31-tur. Nima haqida?", text: "오늘은 금요일입니다. 내일은 토요일입니다.", opts: ["요일", "시간", "가족", "나이"], a: 0, exp: "Juma, shanba — hafta kunlari (요일)." },
+        { q: "TOPIK 읽기 31-tur. Nima haqida?", text: "아버지는 회사원입니다. 어머니는 선생님입니다. 동생은 학생입니다.", opts: ["가족", "학교", "주말", "장소"], a: 0, exp: "Ota, ona, uka — oila (가족)." },
+        { q: "TOPIK 읽기 34-tur. Bo'sh joyga mos so'z.", text: "저는 도서관(   ) 책을 읽어요.", opts: ["에서", "에", "을", "하고"], a: 0, exp: "Harakat joyi → 에서." },
+        { q: "TOPIK 읽기 35-tur. Bo'sh joyga mos so'z.", text: "이 가방은 아주 (   ). 그래서 못 사요.", opts: ["비싸요", "싸요", "좋아요", "작아요"], a: 0, exp: "Sotib ololmayman, chunki qimmat." },
+        { q: "TOPIK 읽기 43-tur. Matnga mos gap.", text: "저는 주말에 친구하고 같이 영화관에 갔어요. 영화가 아주 재미있었어요. 영화를 보고 식당에서 저녁을 먹었어요.", opts: ["친구하고 영화를 봤어요.", "영화가 재미없었어요.", "집에서 저녁을 먹었어요.", "월요일에 영화관에 갔어요."], a: 0, exp: "Do'sti bilan kino ko'rgan; kino qiziqarli; kechki ovqat restoranda." },
+        { q: "Buyurtmani toping.", audio: "커피 두 잔하고 물 한 병 주세요.", opts: ["Ikki qahva va bir shisha suv", "Bir qahva va ikki shisha suv", "Ikki qahva va ikki shisha suv", "Uch qahva"], a: 0, exp: "두 잔 — ikki finjon, 한 병 — bir shisha." }
+      ]
+    }
+  ]
+});
+
+STAGES.push({
+  id: "c", line: 4, color: "#00A5DE", name: "Shaharda", ko: "도시 생활",
+  lessons: [
+    {
+      id: "c1", type: "lesson", t: "Ovqat va restoran", k: "음식",
+      goal: "Taom buyurtma qilish va nima xohlashingizni aytish.",
+      tip: "-고 싶어요 = o'zbekcha «-moqchiman / -gim kelyapti». Fe'l o'zagiga to'g'ridan-to'g'ri qo'shiladi.",
+      v: [
+        ["밥", "guruch; ovqat"], ["김치", "kimchi"], ["불고기", "bulgogi (marinadlangan go'sht)"], ["비빔밥", "bibimbap"], ["라면", "ramyon (lag'mon)"],
+        ["고기", "go'sht"], ["과일", "meva"], ["빵", "non"], ["우유", "sut"], ["메뉴", "menyu"],
+        ["맵다", "achchiq"], ["달다", "shirin"], ["배고프다", "qorni och"], ["주문하다", "buyurtma bermoq"]
+      ],
+      g: [
+        {
+          p: "V-고 싶어요", uz: "-moqchiman, -gim kelyapti",
+          d: "O'zak + 고 싶어요. Inkor: -고 싶지 않아요. Uchinchi shaxs uchun -고 싶어해요.",
+          ex: [["저는 불고기를 먹고 싶어요.", "Men bulgogi yegim kelyapti."], ["한국에 가고 싶어요.", "Koreyaga borgim kelyapti."], ["오늘은 집에서 쉬고 싶어요.", "Bugun uyda dam olgim kelyapti."]]
+        },
+        {
+          p: "뭘 드릴까요? — N 주세요", uz: "Nima beray? — N bering",
+          d: "Restoran va kafedagi tayyor qolip. 여기요! — ofitsiantni chaqirish. 맵다 → 매워요 (ㅂ tushib, 워 bo'ladi).",
+          ex: [["여기요, 메뉴 좀 주세요.", "Kechirasiz, menyuni bering."], ["비빔밥 하나하고 라면 하나 주세요.", "Bitta bibimbap va bitta ramyon bering."], ["김치가 조금 매워요.", "Kimchi biroz achchiq."]]
+        }
+      ],
+      c: [
+        ["저는 커피를 마시___ 싶어요.", "고", ["지", "에", "를"], "Qahva ichgim kelyapti."],
+        ["배고파요. 밥을 ___ 싶어요.", "먹고", ["먹어", "먹은", "먹지"], "Qornim och. Ovqat yegim kelyapti."],
+        ["이 라면은 아주 ___. (achchiq)", "매워요", ["맵어요", "매아요", "맵요"], "Bu ramyon juda achchiq."],
+        ["여기요, 물 좀 ___.", "주세요", ["가세요", "계세요", "오세요"], "Kechirasiz, suv bering."]
+      ]
+    },
+    {
+      id: "c2", type: "lesson", t: "Xarid", k: "쇼핑",
+      goal: "Do'konda narsa tanlash, so'rash va iltimos qilish.",
+      tip: "-(으)세요 hurmat shakli buyruq-iltimos ma'nosida ham keladi: 앉으세요 — o'tiring. Sotuvchilar aynan shu shaklda gapiradi.",
+      v: [
+        ["옷", "kiyim"], ["신발", "oyoq kiyim"], ["바지", "shim"], ["치마", "yubka"], ["모자", "bosh kiyim"],
+        ["돈", "pul"], ["카드", "karta"], ["색", "rang"], ["사이즈", "o'lcham"], ["입다", "kiymoq (kiyim)"],
+        ["신다", "kiymoq (oyoq kiyim)"], ["예쁘다", "chiroyli"], ["다른", "boshqa"], ["어떤", "qanday"]
+      ],
+      g: [
+        {
+          p: "V-(으)세요", uz: "-ing (xushmuomala iltimos)",
+          d: "Unli o'zak + 세요, undosh o'zak + 으세요. 어서 오세요 — xush kelibsiz.",
+          ex: [["여기에 앉으세요.", "Bu yerga o'tiring."], ["이 옷을 입어 보세요.", "Bu kiyimni kiyib ko'ring."], ["잠깐만 기다리세요.", "Bir oz kuting."]]
+        },
+        {
+          p: "이 / 그 / 저 + N", uz: "bu / shu / anavi + N",
+          d: "이 — menga yaqin, 그 — sizga yaqin yoki ilgari aytilgan, 저 — ikkimizdan ham uzoq.",
+          ex: [["이 바지는 얼마예요?", "Bu shim qancha turadi?"], ["저 모자 좀 보여 주세요.", "Anavi shlyapani ko'rsating."], ["다른 색 있어요?", "Boshqa rangi bormi?"]]
+        }
+      ],
+      c: [
+        ["어서 ___.", "오세요", ["오요", "와세요", "옵세요"], "Xush kelibsiz."],
+        ["여기에 이름을 ___. (쓰다)", "쓰세요", ["쓰으세요", "써세요", "씁세요"], "Bu yerga ismingizni yozing."],
+        ["___ 색 있어요? (boshqa)", "다른", ["어떤", "이", "아주"], "Boshqa rangi bormi?"],
+        ["카드___ 돼요?", "도", ["에서", "의", "를"], "Karta bilan ham bo'ladimi?"]
+      ]
+    },
+    {
+      id: "c3", type: "lesson", t: "Transport", k: "교통",
+      goal: "Qanday borishni va qancha vaqt ketishini aytish.",
+      tip: "(으)로 = «bilan / orqali» (vosita) va «tomonga» (yo'nalish). 지하철로 가요 — metroda boraman.",
+      v: [
+        ["버스", "avtobus"], ["지하철", "metro"], ["택시", "taksi"], ["기차", "poyezd"], ["비행기", "samolyot"],
+        ["자동차", "avtomobil"], ["자전거", "velosiped"], ["타다", "minmoq"], ["내리다", "tushmoq"],
+        ["갈아타다", "almashib minmoq"], ["걸리다", "(vaqt) ketmoq"], ["걷다", "piyoda yurmoq", "걸어요 — ㄷ → ㄹ"], ["길", "yo'l, ko'cha"], ["정류장", "avtobus bekati"]
+      ],
+      g: [
+        {
+          p: "N(으)로", uz: "N bilan (vosita); N tomonga",
+          d: "Unli yoki ㄹ dan keyin 로, boshqa undoshdan keyin 으로. Transport, asbob, til: 한국어로 — koreys tilida. 타다 fe'li 을/를 oladi: 버스를 타요.",
+          ex: [["저는 지하철로 회사에 가요.", "Men ishga metroda boraman."], ["2호선으로 갈아타세요.", "2-liniyaga almashib mining."], ["오른쪽으로 가세요.", "O'ng tomonga yuring."]]
+        },
+        {
+          p: "N에서 N까지 … 걸려요", uz: "N-dan N-gacha … ketadi",
+          d: "Joy oralig'i. 얼마나 걸려요? — Qancha vaqt ketadi?",
+          ex: [["집에서 학교까지 삼십 분 걸려요.", "Uydan maktabgacha o'ttiz daqiqa ketadi."], ["서울에서 부산까지 기차로 가요.", "Seuldan Pusangacha poyezdda boraman."]]
+        }
+      ],
+      c: [
+        ["저는 버스___ 타요.", "를", ["에", "로", "에서"], "Men avtobusga minaman."],
+        ["학교에 자전거___ 가요.", "로", ["으로", "를", "에"], "Maktabga velosipedda boraman."],
+        ["집___ 회사까지 한 시간 걸려요.", "에서", ["부터", "에", "으로"], "Uydan ishgacha bir soat ketadi."],
+        ["서울역에서 ___. (tushing)", "내리세요", ["타세요", "걸리세요", "걸으세요"], "Seul bekatida tushing."],
+        ["3호선___ 갈아타세요.", "으로", ["로", "를", "에서"], "3-liniyaga almashib mining."]
+      ]
+    },
+    {
+      id: "c4", type: "lesson", t: "Reja va taklif", k: "계획",
+      goal: "Kelasi zamon; «-aylikmi?» deb taklif qilish.",
+      tip: "-(으)ㄹ 거예요 = «-moqchiman / -adi (kelajakda)». -(으)ㄹ까요? = «-aylikmi?».",
+      v: [
+        ["여행", "sayohat"], ["휴가", "ta'til (ishdan)"], ["방학", "ta'til (o'qishdan)"], ["계획", "reja"], ["영화", "kino"],
+        ["음악", "musiqa"], ["운동", "sport, mashq"], ["수영", "suzish"], ["등산", "toqqa chiqish"], ["쇼핑", "xarid"],
+        ["사진", "rasm, surat"], ["노래", "qo'shiq"], ["같이", "birga"], ["아마", "ehtimol"]
+      ],
+      g: [
+        {
+          p: "V-(으)ㄹ 거예요", uz: "-moqchiman; -adi (kelasi zamon)",
+          d: "Unli o'zak + ㄹ 거예요 (가다 → 갈 거예요), undosh o'zak + 을 거예요 (먹다 → 먹을 거예요). Taxmin ma'nosini ham beradi: 아마 비가 올 거예요.",
+          ex: [["내일 친구를 만날 거예요.", "Ertaga do'stim bilan uchrashaman."], ["주말에 등산을 할 거예요.", "Dam olish kuni toqqa chiqmoqchiman."], ["방학에 한국에 갈 거예요.", "Ta'tilda Koreyaga boraman."]]
+        },
+        {
+          p: "V-(으)ㄹ까요? — V-아요/어요, 좋아요", uz: "-aylikmi? — Mayli, -aylik",
+          d: "Birga qilishni taklif qilish. Rasmiyroq taklif: -(으)ㅂ시다 (갑시다 — ketdik).",
+          ex: [["같이 영화를 볼까요?", "Birga kino ko'raylikmi?"], ["뭐 먹을까요?", "Nima yeymiz?"], ["좋아요. 같이 가요.", "Mayli. Birga boraylik."]]
+        }
+      ],
+      c: [
+        ["내일 도서관에 ___ 거예요.", "갈", ["가", "간", "갔"], "Ertaga kutubxonaga boraman."],
+        ["저녁에 불고기를 ___ 거예요.", "먹을", ["먹", "먹은", "먹어"], "Kechqurun bulgogi yeyman."],
+        ["같이 커피를 ___?", "마실까요", ["마셨어요", "마시세요", "마실 거예요"], "Birga qahva ichaylikmi?"],
+        ["가: 주말에 뭐 할 거예요?  나: 사진을 ___ 거예요.", "찍을", ["찍", "찍은", "찍어"], "— Dam olish kuni nima qilasiz? — Rasm olaman."]
+      ]
+    },
+    {
+      id: "c5", type: "lesson", t: "Ob-havo va fasllar", k: "날씨",
+      goal: "Ob-havoni tasvirlash; gaplarni «va», «lekin» bilan ulash.",
+      tip: "TOPIK o'qish bo'limida bog'lovchilar eng ko'p sinaladi. -고 = «va», -지만 = «lekin».",
+      v: [
+        ["날씨", "ob-havo"], ["봄", "bahor"], ["여름", "yoz"], ["가을", "kuz"], ["겨울", "qish"],
+        ["비", "yomg'ir"], ["눈", "qor; ko'z"], ["바람", "shamol"], ["덥다", "issiq", "더워요"], ["춥다", "sovuq", "추워요"],
+        ["따뜻하다", "iliq"], ["시원하다", "salqin"], ["맑다", "ochiq (havo)"], ["흐리다", "bulutli"]
+      ],
+      g: [
+        {
+          p: "A/V-고", uz: "va, -ib",
+          d: "Ikki gapni teng bog'laydi yoki ketma-ketlikni bildiradi. O'zakka to'g'ridan-to'g'ri qo'shiladi.",
+          ex: [["여름은 덥고 겨울은 추워요.", "Yoz issiq, qish esa sovuq."], ["저는 밥을 먹고 커피를 마셔요.", "Men ovqat yeb, qahva ichaman."]]
+        },
+        {
+          p: "A/V-지만", uz: "lekin, -sa ham",
+          d: "Qarama-qarshilik. Gap boshida: 하지만 / 그렇지만.",
+          ex: [["한국어는 어렵지만 재미있어요.", "Koreys tili qiyin, lekin qiziqarli."], ["오늘은 바람이 불지만 따뜻해요.", "Bugun shamol esyapti, lekin iliq."], ["비가 오지만 학교에 가요.", "Yomg'ir yog'yapti, lekin maktabga boraman."]]
+        }
+      ],
+      c: [
+        ["오늘은 날씨가 맑___ 따뜻해요.", "고", ["지만", "에", "를"], "Bugun havo ochiq va iliq."],
+        ["이 식당은 비싸___ 맛있어요.", "지만", ["고", "에서", "도"], "Bu restoran qimmat, lekin mazali."],
+        ["겨울에는 눈이 ___.", "와요", ["가요", "먹어요", "해요"], "Qishda qor yog'adi."],
+        ["여름은 아주 ___.", "더워요", ["덥어요", "추워요", "더어요"], "Yoz juda issiq."],
+        ["봄 → 여름 → ___ → 겨울", "가을", ["바람", "날씨", "주말"], "bahor → yoz → kuz → qish"]
+      ]
+    },
+    {
+      id: "c6", type: "lesson", t: "Sabab va sog'liq", k: "이유 · 건강",
+      goal: "Sababni tushuntirish; o'zingizni qanday his qilayotganingizni aytish.",
+      tip: "-아서/어서 = o'zbekcha «-gani uchun / -ib». Bu shakl o'tgan zamon qo'shimchasini olmaydi: 아파서 못 갔어요.",
+      v: [
+        ["아프다", "og'rimoq, kasal bo'lmoq", "아파요"], ["피곤하다", "charchagan"], ["기쁘다", "xursand"], ["슬프다", "xafa, g'amgin"],
+        ["머리", "bosh"], ["배", "qorin"], ["감기", "shamollash"], ["약", "dori"], ["약국", "dorixona"],
+        ["늦다", "kech qolmoq"], ["일찍", "erta"], ["왜", "nega"], ["그래서", "shuning uchun"], ["많이", "ko'p"]
+      ],
+      g: [
+        {
+          p: "A/V-아서 / 어서", uz: "-gani uchun, -ib",
+          d: "Sabab. Hozirgi zamon shaklidan 요 ni olib 서 qo'shing: 아파요 → 아파서, 늦어요 → 늦어서. Buyruq va taklif bilan ishlatilmaydi (u yerda -(으)니까).",
+          ex: [["머리가 아파서 약을 먹었어요.", "Boshim og'rigani uchun dori ichdim."], ["늦어서 죄송합니다.", "Kech qolganim uchun uzr."], ["만나서 반갑습니다.", "Tanishganimdan xursandman."]]
+        },
+        {
+          p: "왜 …? — N 때문에 / 그래서", uz: "Nega? — N tufayli / shuning uchun",
+          d: "때문에 otdan keyin keladi. 그래서 ikki alohida gapni bog'laydi.",
+          ex: [["왜 학교에 안 왔어요?", "Nega maktabga kelmadingiz?"], ["감기 때문에 못 갔어요.", "Shamollash tufayli bora olmadim."], ["피곤해요. 그래서 일찍 잘 거예요.", "Charchadim. Shuning uchun erta uxlayman."]]
+        }
+      ],
+      c: [
+        ["배가 ___ 병원에 갔어요.", "아파서", ["아프고", "아팠서", "아프지만"], "Qornim og'rigani uchun shifoxonaga bordim."],
+        ["___ 죄송합니다. (kech qolib)", "늦어서", ["늦고", "늦지만", "늦었서"], "Kech qolganim uchun uzr."],
+        ["비 ___ 못 갔어요.", "때문에", ["그래서", "하고", "까지"], "Yomg'ir tufayli bora olmadim."],
+        ["감기에 걸렸어요. ___ 약을 먹어요.", "그래서", ["왜", "하지만", "아마"], "Shamolladim. Shuning uchun dori ichyapman."],
+        ["가: ___ 안 먹어요?  나: 배가 아파서요.", "왜", ["뭐", "어디", "언제"], "— Nega yemayapsiz? — Qornim og'riyapti."]
+      ]
+    },
+    {
+      id: "ct", type: "test", t: "Nazorat: 4-liniya", k: "환승 시험",
+      goal: "TOPIK I formatidagi savollar. 80% va undan yuqori — 1-liniya ochiladi.",
+      qs: [
+        { q: "TOPIK 듣기 5-tur. Davom ettiring.", audio: "늦어서 죄송합니다.", opts: ["괜찮아요.", "반갑습니다.", "감사합니다.", "안녕히 계세요."], a: 0, exp: "Uzrga javob: 괜찮아요." },
+        { q: "TOPIK 듣기 7-tur. Bu qayer?", audio: "어디가 아프세요? 어제부터 머리가 아파요.", opts: ["병원", "식당", "백화점", "정류장"], a: 0, exp: "«Qayeringiz og'riyapti?» — shifoxona." },
+        { q: "TOPIK 듣기 7-tur. Bu qayer?", audio: "이 바지 입어 볼까요? 네, 다른 색도 있어요.", opts: ["옷 가게", "약국", "공항", "도서관"], a: 0, exp: "Shim kiyib ko'rish — kiyim do'koni." },
+        { q: "TOPIK 듣기 11-tur. Nima haqida gapirishyapti?", audio: "오늘은 비가 오고 바람이 불어요. 내일은 맑을 거예요.", opts: ["날씨", "교통", "음식", "쇼핑"], a: 0, exp: "Yomg'ir, shamol, ochiq — ob-havo." },
+        { q: "TOPIK 읽기 31-tur. Nima haqida?", text: "저는 버스를 탑니다. 친구는 지하철을 탑니다.", opts: ["교통", "여행", "날씨", "음식"], a: 0, exp: "Avtobus, metro — transport (교통)." },
+        { q: "TOPIK 읽기 34-tur. Bo'sh joyga mos so'z.", text: "배가 고픕니다. 그래서 (   )에 갑니다.", opts: ["식당", "약국", "공원", "은행"], a: 0, exp: "Qorni och — restoranga boradi." },
+        { q: "TOPIK 읽기 36-tur. Bo'sh joyga mos so'z.", text: "한국어 공부는 (   ) 재미있어요.", opts: ["어렵지만", "어렵고", "어려워서", "어려운"], a: 0, exp: "Qiyin, lekin qiziqarli — qarama-qarshilik: -지만." },
+        { q: "TOPIK 읽기 37-tur. Bo'sh joyga mos so'z.", text: "감기에 걸렸어요. 그래서 약을 (   ).", opts: ["먹었어요", "입었어요", "탔어요", "걸렸어요"], a: 0, exp: "Dori «yeyiladi»: 약을 먹다." },
+        { q: "TOPIK 읽기 43-tur. Matnga mos gap.", text: "저는 다음 주에 휴가입니다. 친구하고 같이 부산에 갈 거예요. 부산까지 기차로 세 시간 걸립니다. 부산에서 사진을 많이 찍고 싶어요.", opts: ["부산에 기차로 갈 거예요.", "저는 지난주에 부산에 갔어요.", "부산까지 비행기를 탈 거예요.", "혼자 여행을 할 거예요."], a: 0, exp: "Kelasi hafta do'sti bilan poyezdda Pusanga boradi." },
+        { q: "TOPIK 읽기 40-tur. Matnga mos KELMAYDIGAN gap.", text: "〈서울 식당〉\n비빔밥 8,000원 · 불고기 12,000원\n시간: 오전 11시 ~ 오후 9시\n월요일은 쉽니다.", opts: ["월요일에도 식당에 갈 수 있어요.", "불고기는 만 이천 원이에요.", "오후 아홉 시까지 해요.", "비빔밥은 팔천 원이에요."], a: 0, exp: "월요일은 쉽니다 — dushanba kuni yopiq." }
+      ]
+    }
+  ]
+});
+
+STAGES.push({
+  id: "d", line: 1, color: "#0052A4", name: "TOPIK I sari", ko: "토픽으로",
+  lessons: [
+    {
+      id: "d1", type: "lesson", t: "Qila olaman, mumkin", k: "능력 · 허락",
+      goal: "Qobiliyat, ruxsat va taqiqni ifodalash.",
+      tip: "TOPIK e'lon matnlarida (40–42-savollar) «mumkin / mumkin emas» eng ko'p uchraydi.",
+      v: [
+        ["운전하다", "mashina haydamoq"], ["요리하다", "ovqat pishirmoq"], ["수영하다", "suzmoq"], ["말하다", "gapirmoq"],
+        ["쓰다", "yozmoq; ishlatmoq"], ["듣다", "eshitmoq", "들어요 — ㄷ → ㄹ"], ["배우다", "o'rganmoq"], ["가르치다", "o'rgatmoq"],
+        ["찍다", "(rasm) olmoq"], ["들어가다", "kirmoq"], ["앉다", "o'tirmoq"], ["피우다", "(sigaret) chekmoq"], ["잘", "yaxshi (ravish)"]
+      ],
+      g: [
+        {
+          p: "V-(으)ㄹ 수 있어요 / 없어요", uz: "-a olaman / -a olmayman",
+          d: "Unli o'zak + ㄹ 수 있다, undosh o'zak + 을 수 있다.",
+          ex: [["저는 한국어를 조금 할 수 있어요.", "Men koreyscha ozgina gapira olaman."], ["저는 운전할 수 없어요.", "Men mashina hayday olmayman."], ["김치를 먹을 수 있어요?", "Kimchi yeya olasizmi?"]]
+        },
+        {
+          p: "V-아도/어도 돼요 · V-(으)면 안 돼요", uz: "-sa bo'ladi · -sa bo'lmaydi",
+          d: "Ruxsat va taqiq. So'zma-so'z ham o'zbekchaga mos: «-sa ham bo'ladi», «-sa bo'lmaydi».",
+          ex: [["여기에 앉아도 돼요?", "Bu yerga o'tirsam bo'ladimi?"], ["여기에서 사진을 찍으면 안 돼요.", "Bu yerda rasmga olish mumkin emas."], ["들어가도 돼요.", "Kirsangiz bo'ladi."]]
+        }
+      ],
+      c: [
+        ["저는 수영___ 수 있어요.", "할", ["하", "한", "해"], "Men suza olaman."],
+        ["이 책을 읽___ 수 있어요?", "을", ["ㄹ", "는", "은"], "Bu kitobni o'qiy olasizmi?"],
+        ["여기에서 담배를 피우___ 안 돼요.", "면", ["고", "서", "도"], "Bu yerda chekish mumkin emas."],
+        ["이 컴퓨터를 써___ 돼요?", "도", ["면", "서", "고"], "Bu kompyuterni ishlatsam bo'ladimi?"]
+      ]
+    },
+    {
+      id: "d2", type: "lesson", t: "Kerak va mumkin emas", k: "의무 · 금지",
+      goal: "Majburiyatni va «-mang» degan iltimosni ifodalash.",
+      tip: "-아야/어야 해요 = «-ish kerak». -지 마세요 = «-mang».",
+      v: [
+        ["숙제", "uy vazifasi"], ["시험", "imtihon"], ["준비하다", "tayyorlamoq"], ["연습하다", "mashq qilmoq"],
+        ["청소하다", "tozalamoq"], ["빨래하다", "kir yuvmoq"], ["일어나다", "turmoq (uyqudan)"], ["씻다", "yuvinmoq"],
+        ["시작하다", "boshlamoq"], ["끝나다", "tugamoq"], ["기다리다", "kutmoq"], ["도와주다", "yordam bermoq"], ["꼭", "albatta"]
+      ],
+      g: [
+        {
+          p: "V-아야 / 어야 해요", uz: "-ish kerak",
+          d: "Hozirgi zamon shaklidan 요 ni olib 야 해요 qo'shing: 가요 → 가야 해요, 먹어요 → 먹어야 해요. 해요 o'rnida 돼요 ham keladi.",
+          ex: [["내일 시험이 있어서 공부해야 해요.", "Ertaga imtihon bo'lgani uchun o'qishim kerak."], ["일찍 일어나야 해요.", "Erta turish kerak."], ["약을 꼭 먹어야 돼요.", "Dorini albatta ichish kerak."]]
+        },
+        {
+          p: "V-지 마세요", uz: "-mang",
+          d: "Xushmuomala taqiq. O'zak + 지 마세요.",
+          ex: [["여기에서 기다리지 마세요.", "Bu yerda kutmang."], ["걱정하지 마세요.", "Xavotir olmang."], ["수업 시간에 자지 마세요.", "Dars vaqtida uxlamang."]]
+        }
+      ],
+      c: [
+        ["숙제를 ___ 해요. (qilish kerak)", "해야", ["하야", "해서", "하고"], "Uy vazifasini qilish kerak."],
+        ["내일 일찍 ___ 해요.", "일어나야", ["일어나", "일어나서", "일어나고"], "Ertaga erta turish kerak."],
+        ["여기에 들어가___ 마세요.", "지", ["고", "서", "면"], "Bu yerga kirmang."],
+        ["수업이 아홉 시에 ___. (boshlanadi)", "시작해요", ["끝나요", "기다려요", "씻어요"], "Dars soat to'qqizda boshlanadi."]
+      ]
+    },
+    {
+      id: "d3", type: "lesson", t: "Shart va vaqt", k: "조건 · 때",
+      goal: "«-sa», «-ganda», «-dan oldin / keyin» deb gap tuzish.",
+      tip: "-(으)면 = o'zbekcha «-sa». Bu to'rt qolip TOPIK I o'qish matnlarining deyarli har birida bor.",
+      v: [
+        ["시간", "vaqt"], ["문제", "muammo; savol"], ["질문", "savol"], ["대답", "javob"], ["생각하다", "o'ylamoq"],
+        ["알다", "bilmoq", "알아요"], ["모르다", "bilmaslik", "몰라요"], ["전화하다", "qo'ng'iroq qilmoq"], ["보내다", "yubormoq"],
+        ["받다", "olmoq (qabul)"], ["주다", "bermoq"], ["전", "oldin"], ["후", "keyin"], ["때", "payt"]
+      ],
+      g: [
+        {
+          p: "A/V-(으)면", uz: "-sa",
+          d: "Unli o'zak + 면, undosh o'zak + 으면.",
+          ex: [["시간이 있으면 같이 영화를 봐요.", "Vaqtingiz bo'lsa, birga kino ko'raylik."], ["질문이 있으면 전화하세요.", "Savolingiz bo'lsa, qo'ng'iroq qiling."], ["비가 오면 집에 있을 거예요.", "Yomg'ir yog'sa, uyda bo'laman."]]
+        },
+        {
+          p: "V-(으)ㄹ 때 · V-기 전에 · V-(으)ㄴ 후에", uz: "-ganda · -ishdan oldin · -gandan keyin",
+          d: "Ot bilan: 식사 전에, 수업 후에, 방학 때.",
+          ex: [["밥을 먹기 전에 손을 씻어요.", "Ovqat yeyishdan oldin qo'l yuvaman."], ["수업이 끝난 후에 친구를 만나요.", "Dars tugagandan keyin do'stim bilan uchrashaman."], ["한국에 살 때 지하철을 많이 탔어요.", "Koreyada yashaganimda metroda ko'p yurardim."]]
+        }
+      ],
+      c: [
+        ["돈이 많___ 여행을 가고 싶어요.", "으면", ["면", "고", "지만"], "Pulim ko'p bo'lsa, sayohatga borgim keladi."],
+        ["자___ 전에 책을 읽어요.", "기", ["고", "는", "을"], "Uxlashdan oldin kitob o'qiyman."],
+        ["숙제를 한 ___에 쉴 거예요.", "후", ["전", "때", "안"], "Uy vazifasini qilgandan keyin dam olaman."],
+        ["저는 그 사람의 이름을 ___. (bilmayman)", "몰라요", ["알아요", "모라요", "모르요"], "Men u odamning ismini bilmayman."],
+        ["내일 날씨가 좋___ 등산을 갈까요?", "으면", ["면", "아서", "지만"], "Ertaga havo yaxshi bo'lsa, toqqa chiqaylikmi?"]
+      ]
+    },
+    {
+      id: "d4", type: "lesson", t: "Hozir qilyapman, qilib ko'rganman", k: "진행 · 경험",
+      goal: "Davom etayotgan harakat va tajriba haqida gapirish.",
+      tip: "-아/어 보다 = o'zbekcha «-ib ko'rmoq» — so'zma-so'z bir xil. Koreyadagi tajribangiz haqida gapirish uchun eng kerakli qolip.",
+      v: [
+        ["지내다", "(vaqt) o'tkazmoq, yashamoq"], ["찾다", "qidirmoq, topmoq"], ["만들다", "yasamoq, tayyorlamoq"], ["놀다", "o'ynamoq, dam olmoq"],
+        ["웃다", "kulmoq"], ["울다", "yig'lamoq"], ["구경하다", "tomosha qilmoq"], ["여행하다", "sayohat qilmoq"],
+        ["처음", "birinchi marta"], ["다시", "yana, qaytadan"], ["벌써", "allaqachon"], ["아직", "hali"], ["요즘", "shu kunlarda"]
+      ],
+      g: [
+        {
+          p: "V-고 있어요", uz: "-yapman (hozir)",
+          d: "O'zak + 고 있어요. Hurmat shakli: -고 계세요.",
+          ex: [["저는 요즘 한국어를 배우고 있어요.", "Men shu kunlarda koreys tilini o'rganyapman."], ["지금 뭐 하고 있어요?", "Hozir nima qilyapsiz?"], ["친구를 기다리고 있어요.", "Do'stimni kutyapman."]]
+        },
+        {
+          p: "V-아/어 봤어요 · V-(으)ㄴ 적이 있어요", uz: "-ib ko'rganman",
+          d: "Tajriba. -아/어 보세요 — «-ib ko'ring» (tavsiya). Inkor: 아직 안 가 봤어요.",
+          ex: [["한국에서 살아 봤어요.", "Koreyada yashab ko'rganman."], ["김치를 만들어 본 적이 있어요.", "Kimchi tayyorlab ko'rganman."], ["이 음식을 한번 먹어 보세요.", "Bu taomni bir tatib ko'ring."]]
+        }
+      ],
+      c: [
+        ["지금 숙제를 하___ 있어요.", "고", ["서", "면", "지"], "Hozir uy vazifasini qilyapman."],
+        ["제주도에 가 ___? (borib ko'rganmisiz)", "봤어요", ["봐요", "볼까요", "보세요"], "Jeju oroliga borib ko'rganmisiz?"],
+        ["불고기를 먹어 본 ___이 있어요.", "적", ["때", "후", "전"], "Bulgogi yeb ko'rganman."],
+        ["저는 ___ 부산에 안 가 봤어요.", "아직", ["벌써", "다시", "아주"], "Men hali Pusanga borib ko'rmaganman."]
+      ]
+    },
+    {
+      id: "d5", type: "lesson", t: "Taqqoslash va aniqlovchi", k: "비교 · 관형형",
+      goal: "Narsalarni solishtirish; «-gan / -adigan» shaklida otni aniqlash.",
+      tip: "Aniqlovchi otdan oldin keladi — o'zbekchadagi kabi: «men o'qiyotgan kitob» = 제가 읽는 책. Bu TOPIK II ga o'tish uchun eng muhim ko'prik.",
+      v: [
+        ["더", "ko'proq, yanada"], ["제일", "eng"], ["빠르다", "tez", "빨라요"], ["느리다", "sekin"], ["쉽다", "oson", "쉬워요"],
+        ["어렵다", "qiyin", "어려워요"], ["가깝다", "yaqin", "가까워요"], ["멀다", "uzoq"], ["길다", "uzun"], ["짧다", "qisqa"],
+        ["같다", "bir xil"], ["다르다", "farqli", "달라요"], ["보다", "-dan ko'ra"]
+      ],
+      g: [
+        {
+          p: "N보다 (더) A", uz: "N-dan ko'ra A-roq",
+          d: "보다 solishtirilayotgan otdan keyin keladi. 제일 / 가장 — «eng».",
+          ex: [["지하철이 버스보다 더 빨라요.", "Metro avtobusdan ko'ra tezroq."], ["저는 여름보다 겨울을 더 좋아해요.", "Men yozdan ko'ra qishni ko'proq yaxshi ko'raman."], ["이 문제가 제일 어려워요.", "Bu savol eng qiyini."]]
+        },
+        {
+          p: "V-는 N · A-(으)ㄴ N · V-(으)ㄴ N · V-(으)ㄹ N", uz: "-yotgan N · (sifat) N · -gan N · -adigan N",
+          d: "Fe'l hozirgi: 는 (먹는 사람). Sifat: (으)ㄴ (큰 가방, 작은 집). Fe'l o'tgan: (으)ㄴ (어제 본 영화). Kelasi: (으)ㄹ (내일 할 일).",
+          ex: [["저기 책을 읽는 사람이 제 친구예요.", "Anavi kitob o'qiyotgan odam mening do'stim."], ["저는 매운 음식을 좋아해요.", "Men achchiq taomni yaxshi ko'raman."], ["어제 본 영화가 재미있었어요.", "Kecha ko'rgan kinom qiziqarli edi."]]
+        }
+      ],
+      c: [
+        ["비행기가 기차___ 빨라요.", "보다", ["에서", "까지", "하고"], "Samolyot poyezddan tezroq."],
+        ["제가 좋아하___ 음식은 비빔밥이에요.", "는", ["은", "을", "고"], "Men yaxshi ko'radigan taom — bibimbap."],
+        ["저는 ___ 집에 살아요. (작다)", "작은", ["작는", "작을", "작고"], "Men kichik uyda yashayman."],
+        ["어제 ___ 옷이 아주 예뻐요. (사다)", "산", ["사는", "살", "사고"], "Kecha sotib olgan kiyimim juda chiroyli."],
+        ["쉽다 ↔ ___", "어렵다", ["가깝다", "느리다", "짧다"], "oson ↔ qiyin"]
+      ]
+    },
+    {
+      id: "d6", type: "lesson", t: "Rasmiy uslub va e'lonlar", k: "격식체 · 안내문",
+      goal: "TOPIK matnlari yoziladigan -ㅂ니다/습니다 uslubini va e'lon so'zlarini o'qish.",
+      tip: "TOPIK I o'qish bo'limining deyarli hamma matni shu uslubda. Shaklni tanisangiz — bilgan so'zlaringiz yana ko'rinadi.",
+      v: [
+        ["안내", "ma'lumot, e'lon"], ["이용", "foydalanish"], ["요금", "to'lov, narx"], ["무료", "bepul"], ["휴일", "dam olish kuni"],
+        ["예약", "bron qilish"], ["배달", "yetkazib berish"], ["초대", "taklif"], ["약속", "va'da; uchrashuv"], ["행사", "tadbir"],
+        ["장소", "joy"], ["날짜", "sana"], ["모든", "barcha"], ["누구나", "har kim"]
+      ],
+      g: [
+        {
+          p: "A/V-ㅂ니다 / 습니다 · -ㅂ니까 / 습니까?", uz: "rasmiy uslub: -adi / -adimi?",
+          d: "Unli o'zak + ㅂ니다 (가다 → 갑니다), undosh o'zak + 습니다 (먹다 → 먹습니다). O'tgan: 갔습니다. Kelasi: 갈 겁니다. Ot: 입니다.",
+          ex: [["저는 매일 아침 운동을 합니다.", "Men har kuni ertalab sport bilan shug'ullanaman."], ["어제 친구와 같이 도서관에서 공부했습니다.", "Kecha do'stim bilan kutubxonada o'qidim."], ["이 버스는 공항에 갑니까?", "Bu avtobus aeroportga boradimi?"]]
+        },
+        {
+          p: "N와/과 · N에게/한테", uz: "N bilan (yozma) · N-ga (kishiga)",
+          d: "와 unlidan keyin, 과 undoshdan keyin. 에게 — yozma, 한테 — og'zaki: 친구에게 전화합니다.",
+          ex: [["도서관은 누구나 무료로 이용할 수 있습니다.", "Kutubxonadan har kim bepul foydalanishi mumkin."], ["부모님과 같이 식당을 예약했습니다.", "Ota-onam bilan birga restoran bron qildim."], ["친구에게 초대 문자를 보냈습니다.", "Do'stimga taklif xabarini yubordim."]]
+        }
+      ],
+      c: [
+        ["먹다 → ___ (rasmiy)", "먹습니다", ["먹ㅂ니다", "먹읍니다", "먹입니다"], "yeyman / yeydi"],
+        ["가다 → ___ (rasmiy)", "갑니다", ["가습니다", "갔니다", "가입니다"], "boraman / boradi"],
+        ["이 행사는 요금이 없습니다. = ___입니다.", "무료", ["예약", "휴일", "배달"], "Bu tadbir bepul."],
+        ["친구___ 선물을 줬습니다.", "에게", ["에서", "을", "과"], "Do'stimga sovg'a berdim."],
+        ["어머니___ 같이 시장에 갑니다.", "와", ["과", "를", "에"], "Onam bilan birga bozorga boraman."]
+      ]
+    },
+    {
+      id: "dt", type: "test", t: "Mini TOPIK I", k: "모의고사",
+      goal: "Yakuniy sinov: TOPIK I ning asosiy savol turlari. 80% — birinchi bosqich tugadi.",
+      qs: [
+        { q: "듣기 1-tur. To'g'ri javobni tanlang.", audio: "한국어를 할 수 있어요?", opts: ["네, 조금 할 수 있어요.", "네, 한국어 책이에요.", "아니요, 한국 사람이에요.", "네, 한국에 가요."], a: 0, exp: "«Koreyscha gapira olasizmi?» — Ha, ozgina." },
+        { q: "듣기 5-tur. Davom ettiring.", audio: "여기에서 사진을 찍어도 돼요?", opts: ["네, 찍어도 돼요.", "네, 사진이에요.", "아니요, 사진이 없어요.", "네, 찍었어요."], a: 0, exp: "Ruxsat so'ralmoqda — «Ha, mumkin»." },
+        { q: "듣기 7-tur. Bu qayer?", audio: "서울역까지 얼마나 걸려요? 이십 분쯤 걸려요. 여기에서 세워 드릴까요?", opts: ["택시", "병원", "식당", "도서관"], a: 0, exp: "«Shu yerda to'xtataymi?» — taksi." },
+        { q: "듣기 11-tur. Nima haqida gapirishyapti?", audio: "저는 형이 한 명, 누나가 한 명 있어요. 저는 동생이 두 명 있어요.", opts: ["가족", "직업", "나이", "친구"], a: 0, exp: "Aka, opa, uka — oila." },
+        { q: "듣기 17-tur. Mazmuniga mos gap.", audio: "주말에 뭐 할 거예요? 날씨가 좋으면 등산을 갈 거예요. 같이 갈까요? 좋아요. 저도 등산을 좋아해요.", opts: ["두 사람은 같이 등산을 갈 거예요.", "주말에 비가 올 거예요.", "두 사람은 영화를 볼 거예요.", "등산을 싫어해요."], a: 0, exp: "«Birga boraylikmi?» — «Mayli»." },
+        { q: "읽기 31-tur. Nima haqida?", text: "봄은 따뜻합니다. 겨울은 춥습니다.", opts: ["계절", "시간", "장소", "취미"], a: 0, exp: "Bahor, qish — fasl (계절)." },
+        { q: "읽기 34-tur. Bo'sh joyga mos so'z.", text: "눈이 나쁩니다. 그래서 (   )을 씁니다.", opts: ["안경", "모자", "우산", "신발"], a: 0, exp: "Ko'zi yomon — ko'zoynak (안경) taqadi. Kontekstdan topish — TOPIK ko'nikmasi." },
+        { q: "읽기 36-tur. Bo'sh joyga mos so'z.", text: "시간이 (   ) 같이 저녁을 먹을까요?", opts: ["있으면", "있지만", "있어서", "있고"], a: 0, exp: "Shart: vaqtingiz bo'lsa — -(으)면." },
+        { q: "읽기 38-tur. Bo'sh joyga mos so'z.", text: "도서관에서는 큰 소리로 (   ).", opts: ["말하면 안 됩니다", "말해야 합니다", "말하고 싶습니다", "말할 수 있습니다"], a: 0, exp: "Kutubxonada baland ovozda gapirish mumkin emas." },
+        { q: "읽기 40-tur. Matnga mos KELMAYDIGAN gap.", text: "〈한국어 말하기 대회〉\n날짜: 10월 9일 (토) 오후 2시\n장소: 서울 도서관 3층\n요금: 무료\n누구나 올 수 있습니다.", opts: ["돈을 내야 합니다.", "토요일에 합니다.", "도서관에서 합니다.", "모든 사람이 갈 수 있습니다."], a: 0, exp: "요금: 무료 — bepul, pul to'lash shart emas." },
+        { q: "읽기 43-tur. Matnga mos gap.", text: "저는 작년에 한국에 처음 왔습니다. 그때는 한국어를 못 했지만 지금은 조금 할 수 있습니다. 요즘 한국 친구와 같이 한국어를 연습하고 있습니다.", opts: ["지금은 한국어를 조금 할 수 있습니다.", "저는 한국에서 태어났습니다.", "한국 친구가 없습니다.", "작년에 한국어를 잘했습니다."], a: 0, exp: "Avval bilmagan, hozir ozgina gapira oladi." },
+        { q: "읽기 46-tur. Asosiy fikr.", text: "저는 아침마다 공원에서 운동을 합니다. 운동을 하면 기분이 좋아지고 건강해집니다. 그래서 바빠도 운동을 꼭 합니다.", opts: ["운동은 건강에 좋아서 꼭 합니다.", "공원이 집에서 가깝습니다.", "아침에 바빠서 운동을 못 합니다.", "운동은 재미없습니다."], a: 0, exp: "Asosiy fikr odatda oxirgi gapda: band bo'lsam ham albatta sport qilaman." }
+      ]
+    }
+  ]
+});
+
+// ---------- yordamchilar ----------
+const $ = (s, e) => (e || document).querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const dayNum = () => { const d = new Date(); return Math.floor((d.getTime() - d.getTimezoneOffset() * 60000) / 864e5); };
+const PASS = 0.8;
+const GAPS = [1, 2, 4, 8, 16, 32, 64];
+const SPK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg>';
+
+// ---------- o'zbekcha transkripsiya ----------
+const CH = ["g", "kk", "n", "d", "tt", "r", "m", "b", "pp", "s", "ss", "", "j", "jj", "ch", "kh", "th", "ph", "h"];
+const JU = ["a", "e", "ya", "ye", "o", "e", "yo", "ye", "o'", "wa", "we", "we", "yo'", "u", "wo", "we", "wi", "yu", "ɨ", "ɨy", "i"];
+const JE = ["", "k", "k", "k", "n", "n", "n", "t", "l", "k", "m", "l", "l", "l", "p", "l", "m", "p", "p", "t", "t", "ng", "t", "t", "k", "t", "p", "t"];
+const LINK = ["", "g", "kk", "ks", "n", "nj", "n", "d", "r", "lg", "lm", "lb", "ls", "lth", "lph", "r", "m", "b", "ps", "s", "ss", "ng", "j", "ch", "kh", "th", "ph", ""];
+const syl = c => { const i = c.charCodeAt(0) - 0xAC00; return i >= 0 && i < 11172 ? [i / 588 | 0, (i % 588) / 28 | 0, i % 28] : null; };
+function tr(str) {
+  let out = "", carry = "", prevFinal = 0;
+  for (let n = 0; n < str.length; n++) {
+    const s = syl(str[n]);
+    if (!s) { out += str[n]; carry = ""; prevFinal = 0; continue; }
+    const nx = n + 1 < str.length ? syl(str[n + 1]) : null;
+    let on = CH[s[0]];
+    if (s[0] === 9 && [2, 6, 12, 17, 20].includes(s[1])) on = "sh";
+    if (s[0] === 5 && prevFinal === 8) on = "l";
+    if (carry) { on = s[1] === 20 && carry === "th" ? "ch" : s[1] === 20 && carry === "d" ? "j" : carry; carry = ""; }
+    let fin = JE[s[2]];
+    if (s[2] && nx && nx[0] === 11 && s[2] !== 21) { carry = LINK[s[2]]; fin = ""; if (carry.length > 1 && carry[0] === "l") { fin = "l"; carry = carry.slice(1); } if (carry === "ks" || carry === "ps" || carry === "nj") { fin = carry[0]; carry = carry.slice(1); } }
+    else if (nx && (nx[0] === 2 || nx[0] === 6)) fin = fin === "k" ? "ng" : fin === "t" ? "n" : fin === "p" ? "m" : fin;
+    if (out && syl(str[n - 1])) out += "-";
+    out += on + JU[s[1]] + fin;
+    prevFinal = s[2];
+  }
+  return out;
+}
+
+// ---------- kurs indeksi ----------
+const ALL = [];
+STAGES.forEach(st => st.lessons.forEach((L, i) => { L.stage = st; L.code = st.line * 100 + i + 1; L.idx = ALL.length; ALL.push(L); }));
+const vocabOf = L => L.type === "hangul" ? L.words.map(w => ({ k: w[0], uz: w[1] })) : (L.v || []).map(w => ({ k: w[0], uz: w[1], n: w[2] }));
+const poolUpTo = idx => { const seen = {}, p = []; for (let i = 0; i <= idx; i++) vocabOf(ALL[i]).forEach(w => { if (!seen[w.k]) { seen[w.k] = 1; p.push(w); } }); return p; };
+const TOTAL_WORDS = poolUpTo(ALL.length - 1).length;
+const UZ = {}; poolUpTo(ALL.length - 1).forEach(w => UZ[w.k] = w.uz);
+
+// ---------- holat va saqlash ----------
+const KEY = "topik-yoli-v1";
+const fresh = () => ({ v: 1, done: {}, srs: {}, streak: { n: 0, last: 0 }, best: 0, day: { d: 0, rev: 0, les: 0, boost: 0 }, set: { tr: true, snd: true }, updatedAt: 0 });
+const norm = o => { const f = fresh(); o = o && typeof o === "object" ? o : {}; return Object.assign(f, o, { streak: Object.assign(f.streak, o.streak), day: Object.assign(f.day, o.day), set: Object.assign(f.set, o.set), done: o.done || {}, srs: o.srs || {} }); };
+let S = fresh();
+try { S = norm(JSON.parse(localStorage.getItem(KEY))); } catch (e) {}
+let cloudDoc = null, cloudBusy = false, cloudDirty = false, syncState = "local";
+function save() {
+  S.updatedAt = Date.now();
+  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
+  cloudPush();
+}
+async function cloudPush() {
+  if (!cloudDoc) return;
+  if (cloudBusy) { cloudDirty = true; return; }
+  cloudBusy = true;
+  try { await cloudDoc.set({ json: JSON.stringify(S), updatedAt: S.updatedAt }); syncState = "cloud"; } catch (e) { syncState = "local"; }
+  cloudBusy = false;
+  if (cloudDirty) { cloudDirty = false; cloudPush(); }
+  const el = $("#sync"); if (el) el.textContent = syncLabel();
+}
+const syncLabel = () => syncState === "cloud" ? "Hisobingizga saqlanmoqda" : "Shu qurilmada saqlanmoqda";
+let ttsCap = null;
+(async () => {
+  const c = window.claude;
+  if (!c || !c.use) return;
+  c.use("tts").then(t => { ttsCap = t; }).catch(() => {});
+  try {
+    const [db, user] = await Promise.all([c.use("db"), c.use("user")]);
+    if (!db || !user) return;
+    const id = await user.id();
+    if (!id) return;
+    const doc = db.collection("data/users/" + id).doc("progress");
+    const snap = await doc.get();
+    let remoteAt = 0;
+    if (snap.exists) {
+      const d = snap.data();
+      remoteAt = d.updatedAt || 0;
+      if (remoteAt > (S.updatedAt || 0)) {
+        S = norm(JSON.parse(d.json));
+        try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
+      }
+    }
+    cloudDoc = doc; syncState = "cloud";
+    if ((S.updatedAt || 0) > remoteAt) cloudPush();
+    if (!cur) render();
+  } catch (e) {}
+})();
+
+// ---------- ovoz ----------
+let koVoice = null;
+const hasSynth = "speechSynthesis" in window;
+function pickVoice() { try { koVoice = speechSynthesis.getVoices().find(v => /^ko/i.test(v.lang)) || null; } catch (e) {} }
+if (hasSynth) { pickVoice(); try { speechSynthesis.addEventListener("voiceschanged", pickVoice); } catch (e) {} }
+const audioOK = () => !!(koVoice || ttsCap);
+function say(text, force) {
+  if (!force && !S.set.snd) return;
+  text = String(text).replace(/_+/g, " ").replace(/[〈〉()]/g, " ");
+  try {
+    if (koVoice || (!ttsCap && hasSynth)) {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "ko-KR"; if (koVoice) u.voice = koVoice; u.rate = 0.85;
+      speechSynthesis.speak(u);
+    } else if (ttsCap) ttsCap.speak(text, { language: "ko" }).catch(() => {});
+  } catch (e) {}
+}
+
+// ---------- taraqqiyot ----------
+const isDone = L => !!S.done[L.id];
+const nextIdx = () => { const i = ALL.findIndex(L => !isDone(L)); return i; };
+const unlocked = L => L.type === "test" || L.idx === 0 || isDone(ALL[L.idx - 1]);
+const learned = () => Object.keys(S.srs).length;
+const dueCards = () => { const t = dayNum(); return Object.keys(S.srs).filter(k => S.srs[k].d <= t && UZ[k]); };
+function touchDay() {
+  const t = dayNum();
+  if (S.day.d !== t) S.day = { d: t, rev: 0, les: 0, boost: 0 };
+  if (S.streak.last !== t) { S.streak.n = S.streak.last === t - 1 ? S.streak.n + 1 : 1; S.streak.last = t; }
+}
+const streakNow = () => S.streak.last >= dayNum() - 1 ? S.streak.n : 0;
+function addWords(L) { const t = dayNum(); vocabOf(L).forEach(w => { if (!S.srs[w.k]) S.srs[w.k] = { b: 0, d: t + 1 }; }); }
+function complete(L, score) {
+  touchDay();
+  const prev = S.done[L.id];
+  S.done[L.id] = { s: Math.max(score, prev ? prev.s : 0), d: dayNum() };
+  addWords(L);
+  if (L.type === "test") for (let i = 0; i < L.idx; i++) if (!isDone(ALL[i])) { S.done[ALL[i].id] = { s: 0, d: dayNum(), skip: 1 }; addWords(ALL[i]); }
+  S.day.les++;
+  save();
+}
+
+// ---------- savol generatori ----------
+function pickDistr(own, pool, item, key, n) {
+  const out = [], seen = {}; seen[item[key]] = 1;
+  shuffle(own).concat(shuffle(pool)).forEach(x => { if (out.length < n && !seen[x[key]] && x.k !== item.k && x.uz !== item.uz && (!item.s || x.s !== item.s)) { seen[x[key]] = 1; out.push(x[key]); } });
+  return out;
+}
+const mk = (o, right, wrong) => { const opts = shuffle([right].concat(wrong)); return Object.assign(o, { type: "mc", opts, a: opts.indexOf(right) }); };
+const qKoUz = (w, own, pool) => mk({ label: "Ma'nosini tanlang", big: w.k, say: w.k }, w.uz, pickDistr(own, pool, w, "uz", 3));
+const qUzKo = (w, own, pool) => mk({ label: "Koreyschasini tanlang", prompt: esc(w.uz), kopts: 1, after: w.k }, w.k, pickDistr(own, pool, w, "k", 3));
+const qListen = (w, own, pool) => mk({ label: "Tinglang va ma'nosini tanlang", audio: w.k, hideAudioText: 1, fbKo: w.k }, w.uz, pickDistr(own, pool, w, "uz", 3));
+function buildQs(L) {
+  const pool = poolUpTo(L.idx), own = vocabOf(L), V = shuffle(own), qs = [];
+  if (L.type === "test") return shuffle(L.qs).map(q => { const right = q.opts[q.a]; return mk({ label: esc(q.q), text: q.text, audio: q.audio, exp: q.exp, kopts: /[가-힣]/.test(q.opts[0]) }, right, q.opts.filter((_, i) => i !== q.a)); });
+  if (L.type === "hangul") {
+    const lets = L.letters.map(l => ({ k: l[0], s: l[1] }));
+    let lp = []; for (let i = 0; i <= L.idx; i++) if (ALL[i].type === "hangul") lp = lp.concat(ALL[i].letters.map(l => ({ k: l[0], s: l[1] })));
+    const dist = (it, key) => { const o = [], seen = {}; seen[it[key]] = 1; shuffle(lets).concat(shuffle(lp)).forEach(x => { if (o.length < 3 && !seen[x[key]] && x.s !== it.s) { seen[x[key]] = 1; o.push(x[key]); } }); return o; };
+    lets.forEach(l => qs.push(mk({ label: "Qanday o'qiladi?", big: l.k, say: l.k }, l.s, dist(l, "s"))));
+    shuffle(lets).slice(0, 5).forEach(l => qs.push(mk({ label: "Harfni toping", prompt: "«" + esc(l.s) + "» deb o'qiladigan bo'g'in", kopts: 1, after: l.k }, l.k, dist(l, "k"))));
+    if (audioOK()) shuffle(lets).slice(0, 4).forEach(l => qs.push(mk({ label: "Tinglang va bo'g'inni tanlang", audio: l.k, hideAudioText: 1, kopts: 1 }, l.k, dist(l, "k"))));
+    V.slice(0, 4).forEach(w => { const d = shuffle(own.filter(x => x.k !== w.k && x.k.length === w.k.length)).concat(shuffle(own.filter(x => x.k !== w.k))).map(x => tr(x.k)).filter((x, i, a) => x !== tr(w.k) && a.indexOf(x) === i).slice(0, 3); if (d.length === 3) qs.push(mk({ label: "So'zni o'qing", big: w.k, say: w.k, sub: esc(w.uz) }, tr(w.k), d)); });
+    V.slice(4, 8).forEach(w => qs.push(qKoUz(w, own, pool)));
+    return shuffle(qs);
+  }
+  V.slice(0, 6).forEach(w => qs.push(qKoUz(w, own, pool)));
+  V.slice(6).concat(V).slice(0, 5).forEach(w => qs.push(qUzKo(w, own, pool)));
+  if (audioOK()) V.slice(-3).forEach(w => qs.push(qListen(w, own, pool)));
+  (L.c || []).forEach(c => qs.push(mk({ label: "Bo'sh joyni to'ldiring", prompt: esc(c[0]).replace("___", '<span class="blank">?</span>'), pko: 1, sub: esc(c[3]), kopts: 1, after: /→|=|↔/.test(c[0]) ? c[1] : c[0].replace("___", c[1]) }, c[1], c[2])));
+  const sents = []; (L.g || []).forEach(g => g.ex.forEach(e => { const n = e[0].split(" ").length; if (n >= 3 && n <= 6) sents.push(e); }));
+  shuffle(sents).slice(0, 3).forEach(e => qs.push({ type: "build", label: "Gapni tuzing", prompt: esc(e[1]), answer: e[0], tokens: shuffle(e[0].split(" ")) }));
+  return shuffle(qs);
+}
+
+// ---------- dars slaydlari ----------
+const wordCard = w => `<button class="word" data-act="say" data-t="${esc(w.k)}"><span class="l"><span class="ko">${esc(w.k)}</span>${S.set.tr ? `<span class="tr">${esc(tr(w.k))}</span>` : ""}<span class="uz">${esc(w.uz)}</span>${w.n ? `<span class="note">${esc(w.n)}</span>` : ""}</span><span class="spk">${SPK}</span></button>`;
+function buildSlides(L) {
+  const sl = [], own = vocabOf(L);
+  let head = `<div class="eyebrow">${L.stage.line}-liniya · ${L.code}-bekat</div><h1 class="slide-k ko">${esc(L.k)}</h1><h2 class="slide-h">${esc(L.t)}</h2><p>${esc(L.goal)}</p>`;
+  if (L.tip) head += `<div class="tip"><b>Sizga mos yo'l</b>${esc(L.tip)}</div>`;
+  if (L.type === "test") { sl.push(head + `<div class="tip"><b>Qoidalar</b>${L.qs.length} ta savol. Xato javoblar qayta so'ralmaydi — xuddi imtihondagidek. O'tish bali: ${PASS * 100}%.${audioOK() ? "" : " Bu qurilmada koreyscha ovoz topilmadi, shuning uchun tinglash savollari matn ko'rinishida beriladi."}</div>`); return sl; }
+  head += `<p class="muted small">${L.type === "hangul" ? L.letters.length + " ta belgi · " : ""}${own.length} ta so'z${L.g ? " · " + L.g.length + " ta grammatik qolip" : ""} · taxminan ${L.type === "hangul" ? 15 : 22} daqiqa</p>`;
+  sl.push(head);
+  if (L.intro) sl.push(`<div class="eyebrow">Qoida</div><div class="prose">${L.intro}</div>`);
+  if (L.type === "hangul") {
+    for (let i = 0; i < L.letters.length; i += 3) sl.push(`<div class="eyebrow">Belgilar · bosib tinglang</div><div class="letters">${L.letters.slice(i, i + 3).map(l => `<button class="letter" data-act="say" data-t="${esc(l[0])}"><span class="ko">${esc(l[0])}</span><span class="snd">${esc(l[1])}</span><span class="note">${esc(l[2])}</span></button>`).join("")}</div>`);
+  }
+  for (let i = 0; i < own.length; i += 4) sl.push(`<div class="eyebrow">${L.type === "hangul" ? "O'qib ko'ring" : "So'zlar"} · ${Math.min(i + 4, own.length)} / ${own.length}</div><div class="words">${own.slice(i, i + 4).map(wordCard).join("")}</div>`);
+  (L.g || []).forEach(g => sl.push(`<div class="eyebrow">Grammatika</div><div class="pat">${esc(g.p)}</div><div class="eq">≈ ${esc(g.uz)}</div><p>${esc(g.d)}</p><ul class="ex">${g.ex.map(e => `<li><button data-act="say" data-t="${esc(e[0])}"><span><span class="ko">${esc(e[0])}</span><br>${S.set.tr ? `<span class="tr">${esc(tr(e[0]))}</span><br>` : ""}<span class="uz">${esc(e[1])}</span></span><span class="spk">${SPK}</span></button></li>`).join("")}</ul>`));
+  return sl;
+}
+
+// ---------- ko'rinishlar ----------
+let tab = "home", cur = null;
+const main = $("#main"), player = $("#player"), nav = $("#nav");
+function render() {
+  const inP = !!cur;
+  main.hidden = inP; nav.hidden = inP; player.hidden = !inP;
+  if (inP) return renderPlayer();
+  nav.querySelectorAll("button").forEach(b => b.dataset.tab === tab ? b.setAttribute("aria-current", "page") : b.removeAttribute("aria-current"));
+  const due = dueCards().length, pip = $("#pip"); pip.hidden = !due; pip.textContent = due;
+  main.innerHTML = ({ home: viewHome, review: viewReview, boost: viewBoost, topik: viewTopik })[tab]();
+}
+const header = () => `<header class="top"><div class="brand"><span class="sign">길</span><b>TOPIK Yo'li</b></div><div class="sync" id="sync">${syncLabel()}</div></header>`;
+
+function viewHome() {
+  const ni = nextIdx(), N = ni < 0 ? null : ALL[ni], due = dueCards().length, t = dayNum(), today = S.day.d === t ? S.day : { rev: 0, les: 0, boost: 0 };
+  const doneN = ALL.filter(isDone).length, lw = learned();
+  let h = header();
+  h += `<div class="stats"><div class="stat"><b>${streakNow()}</b><span>kun ketma-ket</span></div><div class="stat"><b>${lw}</b><span>so'z o'rganildi</span></div><div class="stat"><b>${doneN}<small class="muted" style="font-size:14px"> / ${ALL.length}</small></b><span>bekat o'tildi</span></div></div>`;
+  h += `<section class="plan"><div><div class="eyebrow">Bugungi reja · 20–30 daqiqa</div><h2>${N ? esc(N.t) : "Birinchi bosqich tugadi"}</h2></div><div class="steps">`;
+  h += `<button class="step ${today.rev || (!due && lw) ? "done" : ""}" data-act="tab" data-tab="review" ${lw ? "" : "disabled"}><span class="n">1</span><span class="tx"><b>Takrorlash</b><span>${lw ? (due ? due + " ta so'z kutmoqda · ~5 daqiqa" : "Bugunga so'z qolmadi") : "Birinchi darsdan keyin ochiladi"}</span></span>${due ? '<span class="go">Boshlash</span>' : ""}</button>`;
+  h += `<button class="step ${today.les ? "done" : ""}" data-act="open" data-i="${ni}" ${N ? "" : "disabled"}><span class="n">2</span><span class="tx"><b>${today.les ? "Yana bir bekat" : "Yangi bekat"}</b><span>${N ? N.code + " · " + esc(N.t) + " · ~" + (N.type === "test" ? 10 : N.type === "hangul" ? 15 : 22) + " daqiqa" : "Barcha bekatlar o'tildi"}</span></span>${N ? '<span class="go">Boshlash</span>' : ""}</button>`;
+  h += `<button class="step ${today.boost ? "done" : ""}" data-act="tab" data-tab="boost" ${lw >= 4 ? "" : "disabled"}><span class="n">3</span><span class="tx"><b>Boost — 60 soniya</b><span>${lw >= 4 ? "Tezlik uchun · rekord " + S.best : "Kamida 4 ta so'zdan keyin ochiladi"}</span></span></button>`;
+  h += `</div></section>`;
+  STAGES.forEach(st => {
+    const d = st.lessons.filter(isDone).length;
+    h += `<section class="stage" style="--c:${st.color}"><div class="stage-h"><span class="badge">${st.line}</span><div><h3>${esc(st.name)}</h3><span class="ko muted small">${esc(st.ko)} · ${st.line}호선</span></div><span class="cnt">${d} / ${st.lessons.length}</span></div><ol class="stations">`;
+    st.lessons.forEach(L => {
+      const dn = isDone(L), open = unlocked(L), now = L.idx === ni, x = L.type === "test";
+      const tag = dn ? (S.done[L.id].skip ? "o'tkazildi" : Math.round(S.done[L.id].s * 100) + "%") : x ? "test" : open ? "ochiq" : "yopiq";
+      h += `<li><button class="st ${dn ? "done" : ""} ${now ? "now" : ""} ${x ? "xfer" : ""} ${open ? "" : "locked"}" data-act="open" data-i="${L.idx}" ${open ? "" : "disabled"}><span class="dot"><i></i></span><span class="nm"><span class="code">${L.code}</span><b>${esc(L.t)}</b><span class="k">${esc(L.k)}${x && !dn && !now ? " · bilsangiz, shu testdan o'tib oldinga sakrang" : ""}</span></span><span class="tag">${tag}</span></button></li>`;
+    });
+    h += `</ol></section>`;
+  });
+  return h;
+}
+
+// ---- takrorlash ----
+let R = null;
+function viewReview() {
+  const due = dueCards();
+  if (!R) {
+    return header() + `<section class="plan"><div><div class="eyebrow">Interval takrorlash</div><h2>${due.length ? due.length + " ta so'z bugun kutmoqda" : "Bugunga so'z qolmadi"}</h2></div><p class="muted">Har bir so'z unutilish arafasida qaytadi: 1 → 2 → 4 → 8 → 16 → 32 → 64 kun. Bilgan so'zingiz uzoqroqqa ketadi, bilmaganingiz ertaga qaytadi.</p><button class="btn primary block" data-act="rev-start" ${due.length ? "" : "disabled"}>Takrorlashni boshlash</button><p class="small muted">Jami o'rganilgan: ${learned()} ta so'z. ${learned() ? "" : "Birinchi bekatdan o'ting — so'zlar shu yerga tushadi."}</p></section>`;
+  }
+  if (!R.q.length) {
+    return header() + `<section class="plan res"><div class="hero-k">잘했어요!</div><h2>${R.n} ta so'z takrorlandi</h2><p class="muted">Shundan ${R.ok} tasini bildingiz.</p><button class="btn primary block" data-act="rev-end">Yo'lga qaytish</button></section>`;
+  }
+  const k = R.q[0];
+  return header() + `<div class="row"><span class="eyebrow">Takrorlash</span><span class="muted small">${R.q.length} ta qoldi</span></div><div class="card"><div class="ko">${esc(k)}</div>${S.set.tr && R.open ? `<div class="tr" style="color:var(--accent)">${esc(tr(k))}</div>` : ""}${R.open ? `<div class="uz">${esc(UZ[k])}</div>` : `<p class="muted">Ma'nosini eslang, keyin tekshiring</p>`}<button class="spk" data-act="say" data-t="${esc(k)}" aria-label="Tinglash">${SPK}</button></div>` +
+    (R.open ? `<div class="opts two"><button class="btn danger" data-act="rev-no">Bilmadim</button><button class="btn primary" data-act="rev-yes">Bildim</button></div>` : `<button class="btn primary block" data-act="rev-show">Javobni ko'rsatish</button>`);
+}
+
+// ---- boost ----
+let B = null;
+function boostQ() {
+  const ks = Object.keys(S.srs).filter(k => UZ[k]), k = ks[Math.random() * ks.length | 0], w = { k, uz: UZ[k] }, pool = ks.map(x => ({ k: x, uz: UZ[x] }));
+  return Math.random() < 0.6 ? qKoUz(w, [], pool) : qUzKo(w, [], pool);
+}
+function viewBoost() {
+  const lw = learned();
+  if (!B) return header() + `<section class="plan"><div><div class="eyebrow">Boost rejimi</div><h2>60 soniya. Nechta so'z?</h2></div><p class="muted">TOPIK — vaqtga qarshi imtihon: o'qish bo'limida bir savolga o'rtacha 90 soniya. Bu yerda so'zni o'ylamasdan tanishni mashq qilasiz. Ketma-ket to'g'ri javoblar ballni ko'paytiradi.</p><div class="hud"><div><b>${S.best}</b><span>rekord</span></div><div><b>${lw}</b><span>so'z bazada</span></div><div><b>60</b><span>soniya</span></div></div><button class="btn primary block" data-act="boost-start" ${lw >= 4 ? "" : "disabled"}>${lw >= 4 ? "Boshlash" : "Avval birinchi bekatdan o'ting"}</button></section>`;
+  if (B.over) return header() + `<section class="plan res"><div class="ring pass">${B.score}</div><h2>${B.score >= S.best && B.score ? "Yangi rekord!" : "Vaqt tugadi"}</h2><p class="muted">${B.ok} / ${B.n} to'g'ri · eng uzun seriya ${B.maxc}</p>${B.miss.length ? `<ul class="miss">${B.miss.map(k => `<li><b class="ko">${esc(k)}</b> — ${esc(UZ[k])}</li>`).join("")}</ul><p class="small muted">Xato qilingan so'zlar bugungi takrorlashga qaytarildi.</p>` : ""}<button class="btn primary block" data-act="boost-start">Yana bir marta</button><button class="btn ghost block" data-act="boost-end">Yo'lga qaytish</button></section>`;
+  const q = B.q;
+  return `<div class="hud"><div><b id="bt">${B.t}</b><span>soniya</span></div><div><b>${B.score}</b><span>ball</span></div><div><b>×${Math.min(5, 1 + (B.combo / 3 | 0))}</b><span>seriya ${B.combo}</span></div></div>` + qBody(q, B.picked) + `<button class="btn ghost block" data-act="boost-stop">To'xtatish</button>`;
+}
+
+// ---- TOPIK sahifasi ----
+function viewTopik() {
+  const lw = learned();
+  let h = header();
+  h += `<section class="panel"><div class="eyebrow">Maqsad</div><h2>TOPIK darajalari va o'tish ballari</h2><div class="tblwrap"><table><thead><tr><th>Imtihon</th><th>Bo'limlar</th><th>Vaqt</th><th>Daraja → ball</th></tr></thead><tbody><tr><td><b>TOPIK I</b><br>200 ball</td><td>듣기 30 savol<br>읽기 40 savol</td><td>40 daq<br>60 daq</td><td>1급 → 80<br>2급 → 140</td></tr><tr><td><b>TOPIK II</b><br>300 ball</td><td>듣기 50 savol<br>쓰기 4 topshiriq<br>읽기 50 savol</td><td>60 daq<br>50 daq<br>70 daq</td><td>3급 → 120 · 4급 → 150<br>5급 → 190 · 6급 → 230</td></tr></tbody></table></div><p class="small muted">Koreyada o'qish va ishlash uchun odatda 3–4-daraja, ko'p universitet va kompaniyalarda 4–5-daraja so'raladi. Imtihon sanalari va aniq talablarni topik.go.kr hamda viza yoki universitet shartlaridan tekshiring.</p></section>`;
+  h += `<section class="panel"><div class="eyebrow">So'z boyligi</div><h2>${lw} / 800 so'z — TOPIK 1급 uchun taxminiy me'yor</h2><div class="meter"><i style="width:${Math.min(100, lw / 8)}%"></i></div><p class="small muted">2급 uchun taxminan 1 500–2 000, 3–4급 uchun 3 000–5 000 so'z kerak. Bu platformadagi birinchi bosqich ${TOTAL_WORDS} ta eng ko'p uchraydigan so'z va 40 ga yaqin grammatik qolipni beradi.</p></section>`;
+  h += `<section class="panel"><div class="eyebrow">Yo'l xaritasi</div><h2>Noldan TOPIKgacha</h2><ol class="road">`;
+  STAGES.forEach(st => h += `<li><span class="badge" style="--c:${st.color}">${st.line}</span><div><b>${esc(st.name)} <span class="chip on">tayyor</span></b><span class="small muted">${st.lessons.length - 1} dars + nazorat · ${st.id === "h" ? "1 hafta" : "1–1,5 hafta"}</span></div></li>`);
+  h += `<li><span class="badge" style="--c:var(--muted)">6</span><div><b>TOPIK I to'liq (2급) <span class="chip">hali qo'shilmagan</span></b><span class="small muted">Yana ~1 200 so'z, 60 qolip, to'liq sinov testlari · 3–4 oy</span></div></li><li><span class="badge" style="--c:var(--muted)">7</span><div><b>TOPIK II (3–4급) <span class="chip">hali qo'shilmagan</span></b><span class="small muted">쓰기 (yozish) bo'limi, o'rta daraja grammatikasi · 6–9 oy</span></div></li></ol><p class="small muted">Kuniga bitta bekat bilan tayyor qismi taxminan 5–6 haftaga yetadi. Keyingi bosqichlar shu formatda davom ettiriladi.</p></section>`;
+  h += `<section class="panel"><div class="eyebrow">Metodika</div><h2>Nega aynan shunday tuzilgan</h2><div class="prose"><ul><li><b>O'zbek tili — ustunligingiz.</b> Gap tartibi va qo'shimchalar deyarli bir xil: 는 ≈ esa, 를 ≈ -ni, 에 ≈ -ga/-da, 의 ≈ -ning, -고 싶다 ≈ -moqchi. Shuning uchun har bir qolip inglizcha emas, o'zbekcha muqobili bilan beriladi.</li><li><b>Koreyadagi xotirangiz.</b> So'zlar siz ko'rgan muhitdan boshlanadi: 편의점, 지하철, 화장실, kafe buyurtmasi. Tanish narsa tezroq yodda qoladi.</li><li><b>80% — keyingi bekat.</b> Har dars oxirida mashq; xato savol to'g'ri javob berilguncha qaytadi. O'zlashtirilmagan mavzu ustiga yangisi qurilmaydi.</li><li><b>Interval takrorlash.</b> So'z 1, 2, 4, 8… kundan keyin qaytadi — eng kam vaqt bilan uzoq muddatli xotira.</li><li><b>TOPIK formati birinchi haftadan.</b> Har liniya oxiridagi nazorat haqiqiy savol turlarida: mavzuni topish (31–33), bo'sh joy (34–39), e'lon (40–42), mazmunga moslik (43–45), tinglashda javob tanlash (1–6) va joyni aniqlash (7–10).</li><li><b>Tanish → eslash → tuzish.</b> Avval tinglab tanlaysiz, keyin o'zbekchadan koreyschaga o'tasiz, oxirida gapni o'zingiz yig'asiz.</li></ul></div><p class="small muted">Savollar TOPIK formatida maxsus tuzilgan, rasmiy imtihon materiallaridan ko'chirilmagan. Imtihon oldidan topik.go.kr dagi ochiq o'tgan yillar variantlarini ham ishlang.</p></section>`;
+  h += `<section class="panel"><div class="eyebrow">Sozlamalar</div><div class="row"><div><b>Lotincha o'qilishi</b><div class="small muted">Hangulni ravon o'qiy boshlagach o'chiring</div></div><button class="switch" role="switch" aria-checked="${S.set.tr}" aria-label="Lotincha o'qilishi" data-act="set" data-k="tr"></button></div><div class="row"><div><b>Avtomatik ovoz</b><div class="small muted">${audioOK() ? "So'zlar ko'rsatilganda o'qib beriladi" : "Bu qurilmada koreyscha ovoz topilmadi — boshqa brauzerda sinab ko'ring"}</div></div><button class="switch" role="switch" aria-checked="${S.set.snd}" aria-label="Avtomatik ovoz" data-act="set" data-k="snd"></button></div><div class="row"><div><b>Natijalarni o'chirish</b><div class="small muted">Barcha taraqqiyot noldan boshlanadi</div></div><button class="btn danger" data-act="reset">${resetArm ? "Ha, o'chirilsin" : "O'chirish"}</button></div></section>`;
+  return h;
+}
+let resetArm = false;
+
+// ---------- savol ko'rinishi ----------
+function qBody(q, picked) {
+  let h = `<div class="qlabel">${q.label}</div>`;
+  if (q.text) h += `<div class="passage ko">${esc(q.text)}</div>`;
+  if (q.audio) h += audioOK() ? `<button class="listen" data-act="say" data-t="${esc(q.audio)}" aria-label="Tinglash">${SPK}</button>` : `<div class="passage ko">${esc(q.audio)}</div>`;
+  if (q.big) h += `<div class="qbig ko">${esc(q.big)}</div>`;
+  if (q.prompt) h += `<div class="qprompt ${q.pko ? "ko" : ""}">${q.prompt}</div>`;
+  if (q.sub) h += `<div class="qsub">${q.sub}</div>`;
+  if (q.type === "build") {
+    h += `<div class="line-a">${q.sel.map((ti, j) => `<button class="tile" data-act="untile" data-j="${j}" ${picked != null ? "disabled" : ""}>${esc(q.tokens[ti])}</button>`).join("")}</div><div class="tiles">${q.tokens.map((t, i) => `<button class="tile ${q.sel.includes(i) ? "used" : ""}" data-act="tile" data-i="${i}" ${picked != null ? "disabled" : ""}>${esc(t)}</button>`).join("")}</div>`;
+    return h;
+  }
+  const two = q.opts.every(o => o.length <= 9);
+  h += `<div class="opts ${two ? "two" : ""} ${q.kopts ? "kopts" : ""}">${q.opts.map((o, i) => `<button class="opt ${picked != null ? (i === q.a ? "ok" : i === picked ? "no" : "") : ""}" data-act="opt" data-i="${i}" ${picked != null ? "disabled" : ""}><kbd>${i + 1}</kbd><span>${esc(o)}</span></button>`).join("")}</div>`;
+  return h;
+}
+
+// ---------- pleyer ----------
+function openLesson(i) {
+  const L = ALL[i]; if (!L || !unlocked(L)) return;
+  cur = { L, phase: "intro", slides: buildSlides(L), si: 0, qs: [], qi: 0, total: 0, ok: 0, picked: null, miss: [] };
+  render(); window.scrollTo(0, 0);
+}
+function startQuiz() {
+  const P = cur; P.phase = "quiz"; P.qs = buildQs(P.L); P.total = P.qs.length; P.qi = 0; P.ok = 0; P.miss = []; P.picked = null;
+  P.qs.forEach(q => { if (q.type === "build") q.sel = []; });
+  render(); announce();
+}
+function announce() { const q = cur && cur.qs[cur.qi]; if (!q) return; if (q.audio && audioOK()) say(q.audio, true); else if (q.say) say(q.say); }
+function renderPlayer() {
+  const P = cur, L = P.L;
+  let body = "", foot = "", frac = 0, ct = "";
+  if (P.phase === "intro") {
+    body = P.slides[P.si]; frac = (P.si + 1) / (P.slides.length + 1) * 0.4; ct = (P.si + 1) + " / " + P.slides.length;
+    const last = P.si === P.slides.length - 1;
+    foot = `<button class="btn ghost" data-act="prev" ${P.si ? "" : "disabled"}>Orqaga</button><button class="btn primary" data-act="fwd">${last ? (L.type === "test" ? "Testni boshlash" : "Mashqni boshlash") : "Davom etish"}</button>`;
+    if (P.si === 0 && !last && isDone(L)) foot = `<button class="btn ghost" data-act="skip-intro">Mashqqa o'tish</button>` + foot.replace(/^<button class="btn ghost".*?<\/button>/, "");
+  } else if (P.phase === "quiz") {
+    const q = P.qs[P.qi]; frac = 0.4 + 0.6 * Math.min(1, P.qi / P.qs.length); ct = Math.min(P.qi + 1, P.qs.length) + " / " + P.qs.length;
+    body = qBody(q, P.picked);
+    if (P.picked != null) {
+      const good = P.wasRight, right = q.type === "build" ? q.answer : q.opts[q.a];
+      body += `<div class="fb ${good ? "ok" : "no"}" role="status">${good ? "To'g'ri!" : "To'g'ri javob: <b class='ko'>" + esc(right) + "</b>"}${q.fbKo ? `<span class="ko">${esc(q.fbKo)}${S.set.tr ? " · " + esc(tr(q.fbKo)) : ""}</span>` : ""}${q.exp ? `<span>${esc(q.exp)}</span>` : ""}${!good && L.type !== "test" ? "<span>Bu savol oxirida yana qaytadi.</span>" : ""}</div>`;
+      foot = `<button class="btn primary" data-act="next">Davom etish</button>`;
+    } else if (q.type === "build") foot = `<button class="btn primary" data-act="check" ${q.sel.length === q.tokens.length ? "" : "disabled"}>Tekshirish</button>`;
+  } else {
+    const sc = P.total ? P.ok / P.total : 0, pass = sc >= PASS, nx = ALL[L.idx + 1];
+    frac = 1;
+    body = `<div class="res"><div class="ring ${pass ? "pass" : "fail"}">${Math.round(sc * 100)}%</div><h2 class="slide-h">${pass ? (nx ? "Keyingi bekat ochildi" : "Birinchi bosqich tugadi!") : "Yana bir urinish kerak"}</h2><p class="muted">${P.ok} / ${P.total} birinchi urinishda to'g'ri. O'tish bali: ${PASS * 100}%.</p>${pass ? `<p>${vocabOf(L).length ? vocabOf(L).length + " ta so'z takrorlash jadvaliga qo'shildi — ertaga birinchi marta qaytadi." : ""}${L.type === "test" ? " Oldingi barcha bekatlar o'tilgan deb belgilandi." : ""}</p>` : `<p>Xato qilgan joylaringizni ko'rib chiqing va mashqni qayta ishlang. Shoshilmang — poydevor mustahkam bo'lsa, keyingi bekatlar tez o'tadi.</p>`}${P.miss.length ? `<ul class="miss">${P.miss.map(m => `<li><b class="ko">${esc(m.a)}</b>${m.p ? `<div class="small muted">${m.p}</div>` : ""}${m.exp ? `<div class="small">${esc(m.exp)}</div>` : ""}</li>`).join("")}</ul>` : ""}</div>`;
+    foot = pass ? (nx ? `<button class="btn ghost" data-act="close">Xarita</button><button class="btn primary" data-act="open" data-i="${nx.idx}">Keyingi: ${esc(nx.t)}</button>` : `<button class="btn primary" data-act="close">Yo'lga qaytish</button>`) : `<button class="btn ghost" data-act="again-intro">Darsni qayta ko'rish</button><button class="btn primary" data-act="again">Qayta urinish</button>`;
+  }
+  player.style.setProperty("--c", L.stage.color);
+  player.innerHTML = `<div class="pbar"><button class="x" data-act="close" aria-label="Yopish">✕</button><div class="track"><i style="width:${Math.round(frac * 100)}%"></i></div><span class="ct">${ct}</span></div><div class="pbody">${body}</div><div class="pfoot">${foot}</div>`;
+}
+function answer(right) {
+  const P = cur, q = P.qs[P.qi];
+  P.wasRight = right;
+  if (right && !q.retry) P.ok++;
+  if (!right) {
+    if (!q.retry) P.miss.push({ a: q.type === "build" ? q.answer : q.opts[q.a], p: q.big ? esc(q.big) : q.text ? esc(q.text) : q.audio ? esc(q.audio) : q.prompt || "", exp: q.exp });
+    if (P.L.type !== "test") { const c = Object.assign({}, q, { retry: 1 }); if (c.type === "build") { c.sel = []; c.tokens = shuffle(c.tokens); } else { const r = c.opts[c.a]; c.opts = shuffle(c.opts); c.a = c.opts.indexOf(r); } P.qs.push(c); }
+  }
+  if (q.type === "build") say(q.answer); else if (q.after) say(q.after); else if (q.fbKo && !right) say(q.fbKo);
+  render();
+}
+function nextQ() {
+  const P = cur; P.picked = null; P.qi++;
+  if (P.qi >= P.qs.length) { P.phase = "done"; if (P.ok / P.total >= PASS) complete(P.L, P.ok / P.total); render(); window.scrollTo(0, 0); return; }
+  render(); announce(); window.scrollTo(0, 0);
+}
+
+// ---------- boost mantiqi ----------
+function boostStart() {
+  if (learned() < 4) return;
+  if (B && B.timer) clearInterval(B.timer);
+  B = { t: 60, score: 0, combo: 0, maxc: 0, n: 0, ok: 0, miss: [], q: boostQ(), picked: null, over: false };
+  B.timer = setInterval(() => {
+    if (!B || B.over) return;
+    B.t--; const el = $("#bt"); if (el) el.textContent = B.t;
+    if (B.t <= 0) boostOver();
+  }, 1000);
+  nav.hidden = true; render(); nav.hidden = true;
+}
+function boostOver() {
+  clearInterval(B.timer); B.over = true;
+  touchDay(); S.day.boost = 1; if (B.score > S.best) S.best = B.score;
+  const t = dayNum(); B.miss.forEach(k => { if (S.srs[k]) S.srs[k] = { b: 0, d: t }; });
+  save(); render();
+}
+function boostPick(i) {
+  const q = B.q; if (B.picked != null || B.over) return;
+  B.picked = i; B.n++;
+  const key = q.big || q.after;
+  if (i === q.a) { B.ok++; B.combo++; B.maxc = Math.max(B.maxc, B.combo); B.score += 10 * Math.min(5, 1 + ((B.combo - 1) / 3 | 0)); }
+  else { B.combo = 0; if (!B.miss.includes(key)) B.miss.push(key); }
+  render(); nav.hidden = true;
+  setTimeout(() => { if (!B || B.over) return; B.q = boostQ(); B.picked = null; render(); nav.hidden = true; }, i === q.a ? 250 : 900);
+}
+
+// ---------- hodisalar ----------
+const ACT = {
+  tab(el) { if (B && !B.over) return; tab = el.dataset.tab; R = null; if (B) B = null; resetArm = false; render(); window.scrollTo(0, 0); },
+  open(el) { openLesson(+el.dataset.i); },
+  say(el) { say(el.dataset.t, true); },
+  close() { cur = null; tab = "home"; render(); },
+  prev() { if (cur.si) { cur.si--; render(); window.scrollTo(0, 0); } },
+  fwd() { if (cur.si < cur.slides.length - 1) { cur.si++; render(); window.scrollTo(0, 0); } else startQuiz(); },
+  "skip-intro"() { startQuiz(); },
+  opt(el) {
+    const i = +el.dataset.i;
+    if (!cur) { if (B) boostPick(i); return; }
+    if (cur.picked != null) return;
+    cur.picked = i; answer(i === cur.qs[cur.qi].a);
+  },
+  tile(el) { const q = cur.qs[cur.qi]; q.sel.push(+el.dataset.i); say(q.tokens[+el.dataset.i]); render(); },
+  untile(el) { cur.qs[cur.qi].sel.splice(+el.dataset.j, 1); render(); },
+  check() { const q = cur.qs[cur.qi]; cur.picked = -1; answer(q.sel.map(i => q.tokens[i]).join(" ") === q.answer); },
+  next() { nextQ(); },
+  again() { startQuiz(); window.scrollTo(0, 0); },
+  "again-intro"() { openLesson(cur.L.idx); },
+  "rev-start"() { R = { q: shuffle(dueCards()).slice(0, 30), n: 0, ok: 0, open: false }; render(); if (R.q[0]) say(R.q[0]); },
+  "rev-show"() { R.open = true; render(); },
+  "rev-yes"() { revMark(true); },
+  "rev-no"() { revMark(false); },
+  "rev-end"() { R = null; tab = "home"; render(); },
+  "boost-start"() { boostStart(); },
+  "boost-stop"() { boostOver(); },
+  "boost-end"() { B = null; tab = "home"; render(); },
+  set(el) { const k = el.dataset.k; S.set[k] = !S.set[k]; save(); render(); },
+  reset() { if (!resetArm) { resetArm = true; render(); return; } resetArm = false; const set = S.set; S = fresh(); S.set = set; save(); tab = "home"; render(); }
+};
+function revMark(ok) {
+  const k = R.q.shift(), c = S.srs[k], t = dayNum();
+  if (!R.seen) R.seen = {};
+  if (!R.seen[k]) { R.seen[k] = 1; R.n++; if (ok) R.ok++; }
+  if (ok) { if (c.d <= t) { c.b = Math.min(c.b + 1, GAPS.length - 1); c.d = t + GAPS[c.b]; } }
+  else { c.b = 0; c.d = t + 1; R.q.push(k); }
+  R.open = false;
+  if (!R.q.length) { touchDay(); S.day.rev = 1; }
+  save(); render();
+  if (R.q[0]) say(R.q[0]);
+}
+document.addEventListener("click", e => { const el = e.target.closest("[data-act]"); if (!el || el.disabled) return; const f = ACT[el.dataset.act]; if (f) f(el); });
+document.addEventListener("keydown", e => {
+  if (e.target.closest("input,textarea")) return;
+  if (e.key >= "1" && e.key <= "4") { const b = document.querySelectorAll(".opt")[+e.key - 1]; if (b && !b.disabled) b.click(); }
+  else if (e.key === "Enter" && cur) { const b = $(".pfoot .btn.primary"); if (b && !b.disabled && document.activeElement.tagName !== "BUTTON") b.click(); }
+});
+render();
+
+})();
+</script>
+</body>
+</html>
