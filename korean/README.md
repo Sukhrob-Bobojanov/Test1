@@ -3,7 +3,7 @@
 Koreys tilini noldan mustaqil o'rganish uchun shaxsiy platforma: kuniga 20–30 daqiqa, o'zbek tilida tushuntirish, TOPIK formatidagi nazorat testlari.
 
 - **Ochish:** `korean/index.html` faylini brauzerda oching (server kerak emas).
-- **Tarkib:** 30 dars (6 ta Hangul + 24 ta TOPIK I asosi), 5 ta nazorat testi, interval takrorlash, 60 soniyalik Boost rejimi.
+- **Tarkib:** 86 bekat — Hangul, TOPIK I (1–2급), TOPIK II (3–4급 grammatikasi, yozish bo'limi), 11 ta nazorat va sinov testi, 1 096 so'z; interval takrorlash (so'z + grammatika), 60 soniyalik Boost, ixtiyoriy yozib javob berish.
 - **O'tish qoidasi:** har bir bekat mashqida 80% — keyingisi ochiladi. Nazorat testidan o'tsangiz, oldingi bekatlar o'tkazib yuboriladi.
 - **Saqlash:** taraqqiyot brauzerda (`localStorage`) saqlanadi.
 

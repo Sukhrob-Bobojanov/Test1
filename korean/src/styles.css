@@ -55,9 +55,14 @@ h1,h2,h3,p{margin:0} h1,h2,h3{text-wrap:balance;line-height:1.2}
 
 /* metro map */
 .stage{display:flex;flex-direction:column;gap:4px}
-.stage-h{display:flex;align-items:center;gap:12px;padding:4px 0 10px}
-.badge{--c:var(--accent);width:36px;height:36px;border-radius:50%;background:var(--c);color:#fff;font:700 18px var(--num);display:grid;place-items:center;flex:none}
-.stage-h h3{font:700 18px/1.2 var(--num)} .stage-h .cnt{margin-left:auto;font:500 13px var(--num);color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
+.stage-h{display:flex;align-items:center;gap:12px;padding:6px 0;width:100%;min-width:0}
+.stage-h .shd{flex:1;min-width:0;display:flex;flex-direction:column}
+.chev{width:28px;height:28px;border-radius:50%;background:var(--surface2);display:grid;place-items:center;font:700 16px var(--num);flex:none}
+.grp{font:700 13px var(--num);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-top:12px;border-top:1px solid var(--line)}
+.tin{width:100%;font:700 26px var(--ko);padding:14px 16px;border-radius:var(--r);border:2px solid var(--line);background:var(--surface);color:var(--ink)}
+.tin:focus{outline:3px solid var(--accent);outline-offset:1px}
+.badge{width:36px;height:36px;border-radius:50%;background:var(--c,var(--accent));color:#fff;font:700 18px var(--num);display:grid;place-items:center;flex:none}
+.stage-h h3{font:700 18px/1.2 var(--num)} .stage-h .cnt{font:500 13px var(--num);color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
 .stations{list-style:none;margin:0;padding:0;position:relative}
 .stations::before{content:"";position:absolute;left:15px;top:22px;bottom:22px;width:6px;border-radius:3px;background:var(--c)}
 .st{position:relative;display:flex;align-items:center;gap:14px;width:100%;padding:9px 8px 9px 0;border-radius:12px;min-width:0}

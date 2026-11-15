@@ -1,5 +1,5 @@
 STAGES.push({
-  id: "c", line: 4, color: "#00A5DE", name: "Shaharda", ko: "도시 생활",
+  grp: "TOPIK I · 1급", id: "c", line: 4, color: "#00A5DE", name: "Shaharda", ko: "도시 생활",
   lessons: [
     {
       id: "c1", type: "lesson", t: "Ovqat va restoran", k: "음식",
@@ -192,7 +192,7 @@ STAGES.push({
 });
 
 STAGES.push({
-  id: "d", line: 1, color: "#0052A4", name: "TOPIK I sari", ko: "토픽으로",
+  grp: "TOPIK I · 1급", id: "d", line: 1, color: "#0052A4", name: "TOPIK I sari", ko: "토픽으로",
   lessons: [
     {
       id: "d1", type: "lesson", t: "Qila olaman, mumkin", k: "능력 · 허락",

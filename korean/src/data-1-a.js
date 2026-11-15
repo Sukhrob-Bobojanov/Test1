@@ -1,5 +1,5 @@
 STAGES.push({
-  id: "a", line: 2, color: "#00A84D", name: "Tanishuv", ko: "만남",
+  grp: "TOPIK I · 1급", id: "a", line: 2, color: "#00A84D", name: "Tanishuv", ko: "만남",
   lessons: [
     {
       id: "a1", type: "lesson", t: "Salomlashish", k: "인사",
@@ -188,7 +188,7 @@ STAGES.push({
 });
 
 STAGES.push({
-  id: "b", line: 3, color: "#EF7C1C", name: "Kundalik hayot", ko: "일상",
+  grp: "TOPIK I · 1급", id: "b", line: 3, color: "#EF7C1C", name: "Kundalik hayot", ko: "일상",
   lessons: [
     {
       id: "b1", type: "lesson", t: "Qayerga? Qayerda?", k: "장소",

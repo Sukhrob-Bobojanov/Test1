@@ -4,7 +4,7 @@
 const STAGES = [];
 
 STAGES.push({
-  id: "h", line: 5, color: "#996CAC", name: "Hangul — alifbo", ko: "한글",
+  grp: "Alifbo", id: "h", line: 5, color: "#996CAC", name: "Hangul — alifbo", ko: "한글",
   lessons: [
     {
       id: "h1", type: "hangul", t: "Asosiy unlilar", k: "모음 1",
