@@ -38,7 +38,7 @@ const ALL = [];
 STAGES.forEach(st => { st.lname = st.lname || st.line + "호선"; });
 STAGES.forEach(st => st.lessons.forEach((L, i) => { L.stage = st; L.code = (st.cb || st.line) + String(i + 1).padStart(2, "0"); L.idx = ALL.length; ALL.push(L); }));
 const isExam = L => L.type === "test" || L.type === "read";
-const vocabOf = L => L.type === "read" ? (L.gl || []).map(w => ({ k: w[0], uz: w[1] })) : L.type === "hangul" ? L.words.map(w => ({ k: w[0], uz: w[1] })) : (L.v || []).map(w => ({ k: w[0], uz: w[1], n: w[2] }));
+const vocabOf = L => L.type === "ctx" ? L.gl.map(w => ({ k: w.k, uz: w.uz, sf: w.sf })) : L.type === "read" ? (L.gl || []).map(w => ({ k: w[0], uz: w[1] })) : L.type === "hangul" ? L.words.map(w => ({ k: w[0], uz: w[1] })) : (L.v || []).map(w => ({ k: w[0], uz: w[1], n: w[2] }));
 const poolUpTo = idx => { const seen = {}, p = []; for (let i = 0; i <= idx; i++) vocabOf(ALL[i]).forEach(w => { if (!seen[w.k]) { seen[w.k] = 1; p.push(w); } }); return p; };
 const TOTAL_WORDS = poolUpTo(ALL.length - 1).length;
 const UZ = {}; ALL.forEach(L => vocabOf(L).forEach(w => { if (!UZ[w.k]) UZ[w.k] = w.uz; else if (w.k === "개" || w.k === "보다") { if (!UZ[w.k].includes(w.uz)) UZ[w.k] += "; " + w.uz; } }));
@@ -158,6 +158,21 @@ const qSpell = (w, own) => {
 const writable = w => !/[^가-힣\s]/.test(w.k) && w.k.replace(/\s/g, "").length >= 2 && w.k.length <= 12;
 function buildQs(L) {
   const pool = poolUpTo(L.idx), own = vocabOf(L), V = shuffle(own), qs = [];
+  if (L.type === "ctx") {
+    const sents = L.text.match(/[^.?!]+[.?!]+/g) || [L.text];
+    const comp = (L.cq || []).map(c => mk({ label: esc(c[0]), text: L.text, kopts: 1 }, c[1], c[2])), out = [];
+    V.forEach((w, i) => {
+      const st = (sents.find(x => x.includes(w.sf)) || "").trim();
+      if (i % 2 === 0 && st) {
+        const d = shuffle(own.filter(x => x.k !== w.k && x.sf !== w.sf && !st.includes(x.sf))).slice(0, 3).map(x => x.sf);
+        if (d.length === 3 && new Set(d.concat(w.sf)).size === 4) { out.push(mk({ label: "Matndagi bo'sh joyga mos so'z", prompt: esc(st).replace(esc(w.sf), '<span class="blank">?</span>'), pko: 1, kopts: 1, exp: w.k + " — " + w.uz, after: st, wk: w.k }, w.sf, d)); return; }
+      }
+      out.push(i % 3 ? qKoUz(w, own, pool) : qUzKo(w, own, pool));
+    });
+    if (audioOK()) shuffle(V).slice(0, 3).forEach(w => out.push(qListen(w, own, pool)));
+    shuffle(V.filter(writable)).slice(0, 5).forEach(w => out.push(S.set.type ? { type: "type", label: "Koreyscha yozing", prompt: esc(w.uz), answer: w.k, wk: w.k } : qSpell(w, own)));
+    return comp.concat(shuffle(out));
+  }
   if (L.type === "read") { const out = []; L.ps.forEach(ps => shuffle(ps.qs).forEach(q => out.push(mk({ label: esc(q[0]), text: ps.text, exp: q[3], kopts: 1 }, q[1], q[2])))); return out; }
   if (L.type === "test") return shuffle(L.qs).map(q => { const right = q.opts[q.a]; return mk({ label: esc(q.q), text: q.text, audio: q.audio, exp: q.exp, kopts: /[가-힣]/.test(q.opts[0]) }, right, q.opts.filter((_, i) => i !== q.a)); });
   if (L.type === "hangul") {
@@ -194,8 +209,14 @@ function buildSlides(L) {
     return sl;
   }
   if (L.type === "test") { sl.push(head + `<div class="tip"><b>Qoidalar</b>${L.qs.length} ta savol. Xato javoblar qayta so'ralmaydi — xuddi imtihondagidek. Vaqt chegaralangan: ${fmt(L.qs.length * 75)}. O'tish bali: ${PASS * 100}%.${audioOK() ? "" : " Bu qurilmada koreyscha ovoz topilmadi, shuning uchun tinglash savollari matn ko'rinishida beriladi."}</div>`); return sl; }
-  head += `<p class="muted small">${L.type === "hangul" ? L.letters.length + " ta belgi · " : ""}${own.length} ta so'z${L.g ? " · " + L.g.length + " ta grammatik qolip" : ""} · taxminan ${L.type === "hangul" ? 15 : L.g ? 22 : 15} daqiqa</p>`;
+  head += `<p class="muted small">${L.type === "hangul" ? L.letters.length + " ta belgi · " : ""}${own.length} ta so'z${L.g ? " · " + L.g.length + " ta grammatik qolip" : ""} · taxminan ${L.type === "hangul" ? 15 : L.g || L.type === "ctx" ? 22 : 15} daqiqa</p>`;
   sl.push(head);
+  if (L.type === "ctx") {
+    let h = esc(L.text); const tags = [];
+    L.gl.slice().sort((a, b) => b.sf.length - a.sf.length).forEach(w => { const e = esc(w.sf), at = h.indexOf(e); if (at < 0) return; tags.push(`<mark class="gw" data-act="gloss" data-k="${esc(w.k)}" data-uz="${esc(w.uz)}">${e}</mark>`); h = h.slice(0, at) + "\u0001" + (tags.length - 1) + "\u0002" + h.slice(at + e.length); });
+    h = h.replace(/\u0001(\d+)\u0002/g, (m, i) => tags[+i]);
+    sl.push(`<div class="eyebrow">Matn · belgilangan so'zni bosing</div><div class="passage ko">${h}</div><div class="glbox" id="glbox">So'zni bossangiz, lug'at shakli va ma'nosi shu yerda chiqadi.</div><button class="btn ghost" data-act="say" data-t="${esc(L.text)}">${SPK}&nbsp; Matnni tinglash</button><p class="small muted">Avval butun matnni o'qib, notanish so'zlarning ma'nosini kontekstdan chamalab ko'ring. Keyin belgilangan so'zlarni bosib tekshiring.</p>`);
+  }
   if (L.intro) sl.push(`<div class="eyebrow">Qoida</div><div class="prose">${L.intro}</div>`);
   if (L.type === "hangul") {
     for (let i = 0; i < L.letters.length; i += 3) sl.push(`<div class="eyebrow">Belgilar · bosib tinglang</div><div class="letters">${L.letters.slice(i, i + 3).map(l => `<button class="letter" data-act="say" data-t="${esc(l[0])}"><span class="ko">${esc(l[0])}</span><span class="snd">${esc(l[1])}</span><span class="note">${esc(l[2])}</span></button>`).join("")}</div>`);
@@ -226,7 +247,7 @@ function viewHome() {
   h += `<div class="stats"><div class="stat"><b>${streakNow()}</b><span>kun ketma-ket</span></div><div class="stat"><b>${lw}</b><span>so'z o'rganildi</span></div><div class="stat"><b>${doneN}<small class="muted" style="font-size:14px"> / ${ALL.length}</small></b><span>bekat o'tildi</span></div></div>`;
   h += `<section class="plan"><div><div class="eyebrow">Bugungi reja · 20–30 daqiqa</div><h2>${N ? esc(N.t) : "Birinchi bosqich tugadi"}</h2></div><div class="steps">`;
   h += `<button class="step ${today.rev || (!due && lw) ? "done" : ""}" data-act="tab" data-tab="review" ${lw ? "" : "disabled"}><span class="n">1</span><span class="tx"><b>Takrorlash</b><span>${lw ? (due ? due + " ta so'z va grammatika · ~6 daqiqa" : "Bugunga so'z qolmadi") : "Birinchi darsdan keyin ochiladi"}</span></span>${due ? '<span class="go">Boshlash</span>' : ""}</button>`;
-  h += `<button class="step ${today.les ? "done" : ""}" data-act="open" data-i="${ni}" ${N ? "" : "disabled"}><span class="n">2</span><span class="tx"><b>${today.les ? "Yana bir bekat" : "Yangi bekat"}</b><span>${N ? N.code + " · " + esc(N.t) + " · ~" + (N.type === "test" ? 12 : N.g ? 22 : 15) + " daqiqa" : "Barcha bekatlar o'tildi"}</span></span>${N ? '<span class="go">Boshlash</span>' : ""}</button>`;
+  h += `<button class="step ${today.les ? "done" : ""}" data-act="open" data-i="${ni}" ${N ? "" : "disabled"}><span class="n">2</span><span class="tx"><b>${today.les ? "Yana bir bekat" : "Yangi bekat"}</b><span>${N ? N.code + " · " + esc(N.t) + " · ~" + (N.type === "test" ? 12 : N.g || N.type === "ctx" ? 22 : 15) + " daqiqa" : "Barcha bekatlar o'tildi"}</span></span>${N ? '<span class="go">Boshlash</span>' : ""}</button>`;
   h += `<button class="step ${today.boost ? "done" : ""}" data-act="tab" data-tab="boost" ${lw >= 4 ? "" : "disabled"}><span class="n">3</span><span class="tx"><b>Boost — 60 soniya</b><span>${lw >= 4 ? "Tezlik uchun · rekord " + S.best : "Kamida 4 ta so'zdan keyin ochiladi"}</span></span></button>`;
   h += `</div></section>`;
   let grp = "";
@@ -238,7 +259,7 @@ function viewHome() {
     h += `<ol class="stations">`;
     st.lessons.forEach(L => {
       const dn = isDone(L), open = unlocked(L), now = L.idx === ni, x = L.type === "test";
-      const tag = dn ? (S.done[L.id].skip ? "o'tkazildi" : Math.round(S.done[L.id].s * 100) + "%") : x ? "test" : !open ? "yopiq" : L.type === "read" ? "o'qish" : "ochiq";
+      const tag = dn ? (S.done[L.id].skip ? "o'tkazildi" : Math.round(S.done[L.id].s * 100) + "%") : x ? "test" : !open ? "yopiq" : L.type === "read" ? "o'qish" : L.type === "ctx" ? "matn" : "ochiq";
       h += `<li><button class="st ${dn ? "done" : ""} ${now ? "now" : ""} ${x ? "xfer" : ""} ${open ? "" : "locked"}" data-act="open" data-i="${L.idx}" ${open ? "" : "disabled"}><span class="dot"><i></i></span><span class="nm"><span class="code">${L.code}</span><b>${esc(L.t)}</b><span class="k">${esc(L.k)}${x && !dn && !now ? " · bilsangiz, shu testdan o'tib oldinga sakrang" : ""}</span></span><span class="tag">${tag}</span></button></li>`;
     });
     h += `</ol></section>`;
@@ -412,6 +433,7 @@ const ACT = {
   tab(el) { if (B && !B.over) return; tab = el.dataset.tab; R = null; if (B) B = null; resetArm = false; render(); window.scrollTo(0, 0); },
   open(el) { openLesson(+el.dataset.i); },
   say(el) { say(el.dataset.t, true); },
+  gloss(el) { say(el.dataset.k, true); const b = $("#glbox"); if (b) b.innerHTML = `<b class="ko">${esc(el.dataset.k)}</b>${S.set.tr ? ` <span class="tr">${esc(tr(el.dataset.k))}</span>` : ""} — ${esc(el.dataset.uz)}`; },
   close() { stopTimer(); cur = null; tab = "home"; render(); },
   prev() { if (cur.si) { cur.si--; render(); window.scrollTo(0, 0); } },
   fwd() { if (cur.si < cur.slides.length - 1) { cur.si++; render(); window.scrollTo(0, 0); } else startQuiz(); },

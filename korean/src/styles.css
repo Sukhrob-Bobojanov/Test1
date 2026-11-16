@@ -191,3 +191,8 @@ th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute
 .switch[aria-checked="true"]::after{transform:translateX(22px)}
 @media (max-width:420px){.opts.two{grid-template-columns:1fr}.stat b{font-size:22px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+mark.gw{background:var(--good-bg);color:inherit;border-radius:5px;padding:1px 3px;cursor:pointer;border-bottom:2px solid var(--good)}
+.glbox{background:var(--surface);border-radius:12px;padding:12px 14px;min-height:48px}
+.glbox .ko{font-size:19px}.glbox .tr{font:500 13px var(--num);color:var(--accent)}
+.btn svg{width:20px;height:20px;fill:currentColor;flex:none}
