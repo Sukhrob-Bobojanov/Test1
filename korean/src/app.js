@@ -37,17 +37,19 @@ function tr(str) {
 const ALL = [];
 STAGES.forEach(st => { st.lname = st.lname || st.line + "호선"; });
 STAGES.forEach(st => st.lessons.forEach((L, i) => { L.stage = st; L.code = (st.cb || st.line) + String(i + 1).padStart(2, "0"); L.idx = ALL.length; ALL.push(L); }));
-const vocabOf = L => L.type === "hangul" ? L.words.map(w => ({ k: w[0], uz: w[1] })) : (L.v || []).map(w => ({ k: w[0], uz: w[1], n: w[2] }));
+const isExam = L => L.type === "test" || L.type === "read";
+const vocabOf = L => L.type === "read" ? (L.gl || []).map(w => ({ k: w[0], uz: w[1] })) : L.type === "hangul" ? L.words.map(w => ({ k: w[0], uz: w[1] })) : (L.v || []).map(w => ({ k: w[0], uz: w[1], n: w[2] }));
 const poolUpTo = idx => { const seen = {}, p = []; for (let i = 0; i <= idx; i++) vocabOf(ALL[i]).forEach(w => { if (!seen[w.k]) { seen[w.k] = 1; p.push(w); } }); return p; };
 const TOTAL_WORDS = poolUpTo(ALL.length - 1).length;
 const UZ = {}; ALL.forEach(L => vocabOf(L).forEach(w => { if (!UZ[w.k]) UZ[w.k] = w.uz; else if (w.k === "개" || w.k === "보다") { if (!UZ[w.k].includes(w.uz)) UZ[w.k] += "; " + w.uz; } }));
 
 // ---------- holat va saqlash ----------
 const KEY = "topik-yoli-v1";
-const fresh = () => ({ v: 1, done: {}, srs: {}, streak: { n: 0, last: 0 }, best: 0, day: { d: 0, rev: 0, les: 0, boost: 0 }, set: { tr: true, snd: true, type: false }, updatedAt: 0 });
+const fresh = () => ({ v: 2, done: {}, srs: {}, streak: { n: 0, last: 0 }, best: 0, day: { d: 0, rev: 0, les: 0, boost: 0 }, set: { tr: true, snd: true, type: true }, updatedAt: 0 });
 const norm = o => { const f = fresh(); o = o && typeof o === "object" ? o : {}; return Object.assign(f, o, { streak: Object.assign(f.streak, o.streak), day: Object.assign(f.day, o.day), set: Object.assign(f.set, o.set), done: o.done || {}, srs: o.srs || {} }); };
 let S = fresh();
-try { S = norm(JSON.parse(localStorage.getItem(KEY))); } catch (e) {}
+const migrate = o => { if ((o.v || 1) < 2) { o.v = 2; o.set.type = true; } return o; };
+try { S = migrate(norm(JSON.parse(localStorage.getItem(KEY)))); } catch (e) {}
 let cloudDoc = null, cloudBusy = false, cloudDirty = false, syncState = "local";
 function save() {
   S.updatedAt = Date.now();
@@ -81,7 +83,7 @@ let ttsCap = null;
       const d = snap.data();
       remoteAt = d.updatedAt || 0;
       if (remoteAt > (S.updatedAt || 0)) {
-        S = norm(JSON.parse(d.json));
+        S = migrate(norm(JSON.parse(d.json)));
         try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
       }
     }
@@ -149,8 +151,14 @@ const grammarPool = () => { const p = []; ALL.forEach(L => { if (isDone(L) && L.
 const rightOf = q => q.answer || q.opts[q.a];
 const nz = x => String(x).normalize("NFC").replace(/[\s.,!?~·]/g, "");
 const fmt = t => (t / 60 | 0) + ":" + String(Math.max(0, t) % 60).padStart(2, "0");
+const qSpell = (w, own) => {
+  const chars = [...w.k.replace(/\s/g, "")], pool = shuffle([...new Set(own.filter(x => x.k !== w.k).map(x => [...x.k.replace(/[^가-힣]/g, "")]).flat())].filter(c => !chars.includes(c))).slice(0, 3);
+  return { type: "build", spell: 1, label: "So'zni bo'g'inlardan yig'ing", prompt: esc(w.uz), answer: w.k, tokens: shuffle(chars.concat(pool)), wk: w.k };
+};
+const writable = w => !/[^가-힣\s]/.test(w.k) && w.k.replace(/\s/g, "").length >= 2 && w.k.length <= 12;
 function buildQs(L) {
   const pool = poolUpTo(L.idx), own = vocabOf(L), V = shuffle(own), qs = [];
+  if (L.type === "read") { const out = []; L.ps.forEach(ps => shuffle(ps.qs).forEach(q => out.push(mk({ label: esc(q[0]), text: ps.text, exp: q[3], kopts: 1 }, q[1], q[2])))); return out; }
   if (L.type === "test") return shuffle(L.qs).map(q => { const right = q.opts[q.a]; return mk({ label: esc(q.q), text: q.text, audio: q.audio, exp: q.exp, kopts: /[가-힣]/.test(q.opts[0]) }, right, q.opts.filter((_, i) => i !== q.a)); });
   if (L.type === "hangul") {
     const lets = L.letters.map(l => ({ k: l[0], s: l[1] }));
@@ -161,11 +169,12 @@ function buildQs(L) {
     if (audioOK()) shuffle(lets).slice(0, 4).forEach(l => qs.push(mk({ label: "Tinglang va bo'g'inni tanlang", audio: l.k, hideAudioText: 1, kopts: 1 }, l.k, dist(l, "k"))));
     V.slice(0, 4).forEach(w => { const d = shuffle(own.filter(x => x.k !== w.k && x.k.length === w.k.length)).concat(shuffle(own.filter(x => x.k !== w.k))).map(x => tr(x.k)).filter((x, i, a) => x !== tr(w.k) && a.indexOf(x) === i).slice(0, 3); if (d.length === 3) qs.push(mk({ label: "So'zni o'qing", big: w.k, say: w.k, sub: esc(w.uz) }, tr(w.k), d)); });
     V.slice(4, 8).forEach(w => qs.push(qKoUz(w, own, pool)));
+    shuffle(V.filter(writable)).slice(0, 4).forEach(w => qs.push(qSpell(w, own)));
     return shuffle(qs);
   }
   V.forEach((w, i) => qs.push(i % 2 ? qUzKo(w, own, pool) : qKoUz(w, own, pool)));
   if (audioOK()) shuffle(V).slice(0, 3).forEach(w => qs.push(qListen(w, own, pool)));
-  if (S.set.type) shuffle(V.filter(w => !/[-()\/…]/.test(w.k))).slice(0, 3).forEach(w => qs.push({ type: "type", label: "Koreyscha yozing", prompt: esc(w.uz), answer: w.k, wk: w.k }));
+  shuffle(V.filter(writable)).slice(0, 5).forEach(w => qs.push(S.set.type ? { type: "type", label: "Koreyscha yozing", prompt: esc(w.uz), answer: w.k, wk: w.k } : qSpell(w, own)));
   (L.c || []).forEach(c => qs.push(qCloze(c)));
   const sents = []; (L.g || []).forEach(g => g.ex.forEach(e => { const n = e[0].split(" ").length; if (n >= 3 && n <= 6) sents.push(e); }));
   shuffle(sents).slice(0, 3).forEach(e => qs.push({ type: "build", label: "Gapni tuzing", prompt: esc(e[1]), answer: e[0], tokens: shuffle(e[0].split(" ")) }));
@@ -178,6 +187,12 @@ function buildSlides(L) {
   const sl = [], own = vocabOf(L);
   let head = `<div class="eyebrow">${esc(L.stage.lname)} · ${L.code}</div><h1 class="slide-k ko">${esc(L.k)}</h1><h2 class="slide-h">${esc(L.t)}</h2><p>${esc(L.goal)}</p>`;
   if (L.tip) head += `<div class="tip"><b>Sizga mos yo'l</b>${esc(L.tip)}</div>`;
+  if (L.type === "read") {
+    sl.push(head + `<div class="tip"><b>Qanday ishlash kerak</b>Imtihondagidek: avval savolni o'qing, keyin matndan javobni qidiring. ${L.ps.length} ta matn, ${L.ps.reduce((n, x) => n + x.qs.length, 0)} ta savol. Xato javob qayta so'ralmaydi. O'tish bali: ${PASS * 100}%.</div>`);
+    if (own.length) sl.push(`<div class="eyebrow">Matndagi tayanch so'zlar</div><div class="words">${own.map(wordCard).join("")}</div>`);
+    L.ps.forEach((ps, i) => sl.push(`<div class="eyebrow">${i + 1}-matn · avval o'zingiz o'qing</div><div class="passage ko">${esc(ps.text)}</div><button class="btn ghost" data-act="say" data-t="${esc(ps.text)}">${SPK}&nbsp; Matnni tinglash</button>`));
+    return sl;
+  }
   if (L.type === "test") { sl.push(head + `<div class="tip"><b>Qoidalar</b>${L.qs.length} ta savol. Xato javoblar qayta so'ralmaydi — xuddi imtihondagidek. Vaqt chegaralangan: ${fmt(L.qs.length * 75)}. O'tish bali: ${PASS * 100}%.${audioOK() ? "" : " Bu qurilmada koreyscha ovoz topilmadi, shuning uchun tinglash savollari matn ko'rinishida beriladi."}</div>`); return sl; }
   head += `<p class="muted small">${L.type === "hangul" ? L.letters.length + " ta belgi · " : ""}${own.length} ta so'z${L.g ? " · " + L.g.length + " ta grammatik qolip" : ""} · taxminan ${L.type === "hangul" ? 15 : L.g ? 22 : 15} daqiqa</p>`;
   sl.push(head);
@@ -223,7 +238,7 @@ function viewHome() {
     h += `<ol class="stations">`;
     st.lessons.forEach(L => {
       const dn = isDone(L), open = unlocked(L), now = L.idx === ni, x = L.type === "test";
-      const tag = dn ? (S.done[L.id].skip ? "o'tkazildi" : Math.round(S.done[L.id].s * 100) + "%") : x ? "test" : open ? "ochiq" : "yopiq";
+      const tag = dn ? (S.done[L.id].skip ? "o'tkazildi" : Math.round(S.done[L.id].s * 100) + "%") : x ? "test" : !open ? "yopiq" : L.type === "read" ? "o'qish" : "ochiq";
       h += `<li><button class="st ${dn ? "done" : ""} ${now ? "now" : ""} ${x ? "xfer" : ""} ${open ? "" : "locked"}" data-act="open" data-i="${L.idx}" ${open ? "" : "disabled"}><span class="dot"><i></i></span><span class="nm"><span class="code">${L.code}</span><b>${esc(L.t)}</b><span class="k">${esc(L.k)}${x && !dn && !now ? " · bilsangiz, shu testdan o'tib oldinga sakrang" : ""}</span></span><span class="tag">${tag}</span></button></li>`;
     });
     h += `</ol></section>`;
@@ -276,7 +291,7 @@ function viewTopik() {
   STAGES.forEach(st => { const d = st.lessons.filter(isDone).length; h += `<li><span class="badge" style="--c:${st.color}">${st.line}</span><div><b>${esc(st.name)} <span class="chip ${d === st.lessons.length ? "on" : ""}">${d} / ${st.lessons.length}</span></b><span class="small muted">${esc(st.grp || "")} · ${st.lessons.length} bekat · taxminan ${Math.ceil(st.lessons.length / 6)} hafta</span></div></li>`; });
   h += `</ol><p class="small muted">Kuniga bitta bekat bilan butun yo'l taxminan ${Math.round(ALL.length / 30)} oy. Grammatika keng qamrangan; so'z boyligini 5–6급 darajasiga (6 000+ so'z) yetkazish uchun TOPIK II bosqichlaridan boshlab koreyscha matn o'qish va o'tgan yillar variantlarini ishlash kerak bo'ladi.</p></section>`;
   h += `<section class="panel"><div class="eyebrow">Metodika</div><h2>Nega aynan shunday tuzilgan</h2><div class="prose"><ul><li><b>O'zbek tili — ustunligingiz.</b> Gap tartibi va qo'shimchalar deyarli bir xil: 는 ≈ esa, 를 ≈ -ni, 에 ≈ -ga/-da, 의 ≈ -ning, -고 싶다 ≈ -moqchi. Shuning uchun har bir qolip inglizcha emas, o'zbekcha muqobili bilan beriladi.</li><li><b>Koreyadagi xotirangiz.</b> So'zlar siz ko'rgan muhitdan boshlanadi: 편의점, 지하철, 화장실, kafe buyurtmasi. Tanish narsa tezroq yodda qoladi.</li><li><b>80% — keyingi bekat.</b> Har dars oxirida mashq; xato savol to'g'ri javob berilguncha qaytadi. O'zlashtirilmagan mavzu ustiga yangisi qurilmaydi.</li><li><b>Interval takrorlash.</b> So'z 1, 2, 4, 8… kundan keyin qaytadi — eng kam vaqt bilan uzoq muddatli xotira.</li><li><b>TOPIK formati birinchi haftadan.</b> Har liniya oxiridagi nazorat haqiqiy savol turlarida: mavzuni topish (31–33), bo'sh joy (34–39), e'lon (40–42), mazmunga moslik (43–45), tinglashda javob tanlash (1–6) va joyni aniqlash (7–10).</li><li><b>Tanish → eslash → tuzish.</b> Avval tinglab tanlaysiz, keyin o'zbekchadan koreyschaga o'tasiz, oxirida gapni o'zingiz yig'asiz.</li></ul></div><p class="small muted">Savollar TOPIK formatida maxsus tuzilgan, rasmiy imtihon materiallaridan ko'chirilmagan. Imtihon oldidan topik.go.kr dagi ochiq o'tgan yillar variantlarini ham ishlang.</p></section>`;
-  h += `<section class="panel"><div class="eyebrow">Sozlamalar</div><div class="row"><div><b>Lotincha o'qilishi</b><div class="small muted">Hangulni ravon o'qiy boshlagach o'chiring</div></div><button class="switch" role="switch" aria-checked="${S.set.tr}" aria-label="Lotincha o'qilishi" data-act="set" data-k="tr"></button></div><div class="row"><div><b>Yozib javob berish</b><div class="small muted">Har darsda 3 ta so'zni koreyscha klaviaturada yozasiz. Eslab qolish uchun eng kuchli usul; TOPIK II yozish bo'limi uchun kerak</div></div><button class="switch" role="switch" aria-checked="${S.set.type}" aria-label="Yozib javob berish" data-act="set" data-k="type"></button></div><div class="row"><div><b>Avtomatik ovoz</b><div class="small muted">${audioOK() ? "So'zlar ko'rsatilganda o'qib beriladi" : "Bu qurilmada koreyscha ovoz topilmadi — boshqa brauzerda sinab ko'ring"}</div></div><button class="switch" role="switch" aria-checked="${S.set.snd}" aria-label="Avtomatik ovoz" data-act="set" data-k="snd"></button></div><div class="row"><div><b>Natijalarni o'chirish</b><div class="small muted">Barcha taraqqiyot noldan boshlanadi</div></div><button class="btn danger" data-act="reset">${resetArm ? "Ha, o'chirilsin" : "O'chirish"}</button></div></section>`;
+  h += `<section class="panel"><div class="eyebrow">Sozlamalar</div><div class="row"><div><b>Lotincha o'qilishi</b><div class="small muted">Hangulni ravon o'qiy boshlagach o'chiring</div></div><button class="switch" role="switch" aria-checked="${S.set.tr}" aria-label="Lotincha o'qilishi" data-act="set" data-k="tr"></button></div><div class="row"><div><b>Klaviaturada yozish</b><div class="small muted">Har darsda 5 ta so'zni koreyscha klaviaturada yozasiz. O'chirilsa, so'zni bo'g'in kataklaridan yig'asiz — klaviatura bo'lmagan qurilma uchun</div></div><button class="switch" role="switch" aria-checked="${S.set.type}" aria-label="Klaviaturada yozish" data-act="set" data-k="type"></button></div><div class="row"><div><b>Avtomatik ovoz</b><div class="small muted">${audioOK() ? "So'zlar ko'rsatilganda o'qib beriladi" : "Bu qurilmada koreyscha ovoz topilmadi — boshqa brauzerda sinab ko'ring"}</div></div><button class="switch" role="switch" aria-checked="${S.set.snd}" aria-label="Avtomatik ovoz" data-act="set" data-k="snd"></button></div><div class="row"><div><b>Natijalarni o'chirish</b><div class="small muted">Barcha taraqqiyot noldan boshlanadi</div></div><button class="btn danger" data-act="reset">${resetArm ? "Ha, o'chirilsin" : "O'chirish"}</button></div></section>`;
   return h;
 }
 let resetArm = false;
@@ -325,16 +340,16 @@ function renderPlayer() {
   if (P.phase === "intro") {
     body = P.slides[P.si]; frac = (P.si + 1) / (P.slides.length + 1) * 0.4; ct = (P.si + 1) + " / " + P.slides.length;
     const last = P.si === P.slides.length - 1;
-    foot = `<button class="btn ghost" data-act="prev" ${P.si ? "" : "disabled"}>Orqaga</button><button class="btn primary" data-act="fwd">${last ? (L.type === "test" ? "Testni boshlash" : "Mashqni boshlash") : "Davom etish"}</button>`;
+    foot = `<button class="btn ghost" data-act="prev" ${P.si ? "" : "disabled"}>Orqaga</button><button class="btn primary" data-act="fwd">${last ? (L.type === "test" ? "Testni boshlash" : L.type === "read" ? "Savollarga o'tish" : "Mashqni boshlash") : "Davom etish"}</button>`;
     if (P.si === 0 && !last && isDone(L)) foot = `<button class="btn ghost" data-act="skip-intro">Mashqqa o'tish</button>` + foot.replace(/^<button class="btn ghost".*?<\/button>/, "");
   } else if (P.phase === "quiz") {
     const q = P.qs[P.qi]; frac = 0.4 + 0.6 * Math.min(1, P.qi / P.qs.length); ct = Math.min(P.qi + 1, P.qs.length) + " / " + P.qs.length + (L.type === "test" ? ` · <span id="tm">${fmt(P.tLeft)}</span>` : "");
     body = qBody(q, P.picked);
     if (P.picked != null) {
       const good = P.wasRight, right = rightOf(q);
-      body += `<div class="fb ${good ? "ok" : "no"}" role="status">${good ? "To'g'ri!" : "To'g'ri javob: <b class='ko'>" + esc(right) + "</b>"}${q.fbKo ? `<span class="ko">${esc(q.fbKo)}${S.set.tr ? " · " + esc(tr(q.fbKo)) : ""}</span>` : ""}${q.exp ? `<span>${esc(q.exp)}</span>` : ""}${!good && L.type !== "test" ? "<span>Bu savol oxirida yana qaytadi.</span>" : ""}</div>`;
+      body += `<div class="fb ${good ? "ok" : "no"}" role="status">${good ? "To'g'ri!" : "To'g'ri javob: <b class='ko'>" + esc(right) + "</b>"}${q.fbKo ? `<span class="ko">${esc(q.fbKo)}${S.set.tr ? " · " + esc(tr(q.fbKo)) : ""}</span>` : ""}${q.exp ? `<span>${esc(q.exp)}</span>` : ""}${!good && !isExam(L) ? "<span>Bu savol oxirida yana qaytadi.</span>" : ""}</div>`;
       foot = `<button class="btn primary" data-act="next">Davom etish</button>`;
-    } else if (q.type === "build") foot = `<button class="btn primary" data-act="check" ${q.sel.length === q.tokens.length ? "" : "disabled"}>Tekshirish</button>`;
+    } else if (q.type === "build") foot = `<button class="btn primary" data-act="check" ${(q.spell ? q.sel.length : q.sel.length === q.tokens.length) ? "" : "disabled"}>Tekshirish</button>`;
     else if (q.type === "type") foot = `<button class="btn primary" data-act="check-type">Tekshirish</button>`;
   } else {
     const sc = P.total ? P.ok / P.total : 0, pass = sc >= PASS, nx = ALL[L.idx + 1];
@@ -353,7 +368,7 @@ function answer(right) {
   if (!right) {
     if (q.wk) P.weak[q.wk] = 1;
     if (!q.retry) P.miss.push({ a: rightOf(q), p: q.big ? esc(q.big) : q.text ? esc(q.text) : q.audio ? esc(q.audio) : q.prompt || "", exp: q.exp });
-    if (P.L.type !== "test") { const c = Object.assign({}, q, { retry: 1 }); if (c.type === "build") { c.sel = []; c.tokens = shuffle(c.tokens); } else if (c.type === "type") c.typed = ""; else { const r = c.opts[c.a]; c.opts = shuffle(c.opts); c.a = c.opts.indexOf(r); } P.qs.push(c); }
+    if (!isExam(P.L)) { const c = Object.assign({}, q, { retry: 1 }); if (c.type === "build") { c.sel = []; c.tokens = shuffle(c.tokens); } else if (c.type === "type") c.typed = ""; else { const r = c.opts[c.a]; c.opts = shuffle(c.opts); c.a = c.opts.indexOf(r); } P.qs.push(c); }
   }
   if (q.answer) say(q.answer); else if (q.after) say(q.after); else if (q.fbKo && !right) say(q.fbKo);
   render();
@@ -409,7 +424,7 @@ const ACT = {
   },
   tile(el) { const q = cur.qs[cur.qi]; q.sel.push(+el.dataset.i); say(q.tokens[+el.dataset.i]); render(); },
   untile(el) { cur.qs[cur.qi].sel.splice(+el.dataset.j, 1); render(); },
-  check() { const q = cur.qs[cur.qi]; cur.picked = -1; answer(q.sel.map(i => q.tokens[i]).join(" ") === q.answer); },
+  check() { const q = cur.qs[cur.qi]; cur.picked = -1; const got = q.sel.map(i => q.tokens[i]).join(q.spell ? "" : " "); answer(q.spell ? nz(got) === nz(q.answer) : got === q.answer); },
   next() { nextQ(); },
   again() { startQuiz(); window.scrollTo(0, 0); },
   "again-intro"() { openLesson(cur.L.idx); },
