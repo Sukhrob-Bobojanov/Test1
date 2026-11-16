@@ -127,7 +127,7 @@ ctxStage({ id: "s", line: "I", cb: "I", lname: "인천1호선", color: "#4F86C0"
     ["유명 학술지의 논문 중 다시 확인되지 않은 것이 많았다.", "실험 계획을 미리 등록하는 연구자는 줄고 있다.", "재현 실패는 학계에서 관심을 받지 못했다.", "과학적 발견은 한 번만 확인되면 사실로 인정된다."]]
 ]);
 
-ctxStage({ id: "c", line: "E", cb: "E", lname: "에버라인", color: "#3F9426", name: "Matn: madaniyat va inson", ko: "문화 · 인간 읽기" }, [
+ctxStage({ id: "ch", line: "E", cb: "E", lname: "에버라인", color: "#3F9426", name: "Matn: madaniyat va inson", ko: "문화 · 인간 읽기" }, [
   ["c1x", "Tarjima mashaqqati", "번역의 어려움", "번역은 낱말을 일대일로 바꿔 끼우는 작업이 아니다. 한 언어에 깃든 정서와 문화적 배경까지 다른 언어로 옮겨야 하기 때문이다. 이를테면 한국어의 '정'이나 '한' 같은 말은 사전의 풀이만으로는 온전한 뜻을 전달하기 힘들다. 원문에 충실하자니 어색해지고 매끄럽게 다듬자니 원작의 결이 훼손되는 딜레마 속에서 번역가는 끊임없이 저울질한다. 훌륭한 번역이 또 하나의 창작으로 대접받는 까닭이 여기에 있다.",
     "낱말=alohida so'z|일대일=birga bir|끼우는:끼우다=tiqib o'rnatmoq|깃든:깃들다=singib joylashmoq|문화적=madaniy|풀이=izoh, sharh|온전한:온전하다=to'liq, butun|원문=asl matn|충실하자니:충실하다=sodiq; to'liq|매끄럽게:매끄럽다=silliq, ravon|원작=asl asar|결=nafis tus, to'qima|번역가=tarjimon|끊임없이=tinimsiz|저울질한다:저울질하다=tarozida tortmoq, chog'ishtirmoq|훌륭한:훌륭하다=ajoyib|대접받는:대접받다=e'zozlanmoq",
     ["좋은 번역은 창작에 가까운 작업이다.", "번역은 단어만 바꾸면 되는 쉬운 일이다.", "사전만 있으면 모든 말을 정확히 옮길 수 있다.", "번역가는 원문을 마음대로 고쳐도 된다."],
